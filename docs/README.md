@@ -1,8 +1,8 @@
 # Panduan pengguna
 
 `panduan-pengguna.pdf` adalah panduan visual berbahasa Indonesia untuk pengguna
-Windows nonprogrammer, mulai dari unduhan Python/proyek hingga konversi dan
-bantuan AI. Sumber mandirinya adalah `panduan-pengguna.tex`; seluruh diagram
+Windows nonprogrammer, mulai dari unduhan Python/proyek hingga CLI, Ruang GRIB
+di browser lokal, dan bantuan AI. Sumber mandirinya adalah `panduan-pengguna.tex`; seluruh diagram
 dibuat dengan TeX/TikZ, tanpa file gambar tambahan.
 
 Pengguna converter cukup membaca PDF. LaTeX hanya diperlukan oleh pengelola
@@ -29,6 +29,8 @@ Build pertama memerlukan internet untuk mengunduh paket TeX. Sumber dan PDF
 akhir disimpan dalam `docs`; log, runtime portable, serta render PNG verifikasi
 lokal berada dalam `data/docs-build` yang diabaikan Git.
 
-Setelah perubahan, pastikan PDF berisi 12 halaman A4, render dan periksa semua
-halaman, lalu cocokkan perintah hasil ekstraksi teks dengan sumber. Jangan
+Setelah perubahan, pastikan PDF berisi 16 halaman A4, render dan periksa semua
+halaman, lalu cocokkan perintah, label tombol, tautan dan nomor referensi halaman
+hasil ekstraksi teks dengan sumber. Footer memakai referensi halaman terakhir;
+build harus selesai melakukan rerun agar semua referensi terisi. Jangan
 menghasilkan PDF kedua secara terpisah menggunakan sistem layout lain.

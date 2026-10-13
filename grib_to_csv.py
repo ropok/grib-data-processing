@@ -75,6 +75,26 @@ def output_stem(input_path, data_type=None, number_of_points=None):
     return stem
 
 
+def dataset_metadata(dataset, frame):
+    """Copy coordinates/units while the source dataset is still open."""
+    monthly = tuple(dataset[next(iter(dataset.data_vars))].dims) == MONTHLY_DIMS
+    times = dataset.time.values.copy()
+    steps = dataset.step.values.copy() if monthly else None
+    return {
+        "dimensions": dict(dataset.sizes),
+        "variables": list(dataset.data_vars),
+        "units": {name: dataset[name].attrs.get("units") for name in dataset.data_vars},
+        "latitude": float(dataset.latitude.values[-1]),
+        "longitude": float(dataset.longitude.values[-1]),
+        "route": "monthly" if monthly else "yearly",
+        "time": times, "step": steps,
+        "reference_time": np.repeat(times, len(steps)) if monthly else times.copy(),
+        "step_hours": np.tile(steps / np.timedelta64(1, "h"), len(times)) if monthly else None,
+        "row_count": len(frame),
+        "missing": {name: int(frame[name].isna().sum()) for name in dataset.data_vars},
+    }
+
+
 def read_grib(input_path, data_type=None, number_of_points=None):
     """Read the notebook table and original coordinates without writing files."""
     input_path = Path(input_path)
@@ -88,22 +108,7 @@ def read_grib(input_path, data_type=None, number_of_points=None):
     # Avoid cfgrib index sidecars and stale indexes when filters change.
     with cfgrib.open_dataset(str(input_path), filter_by_keys=filters, indexpath="") as dataset:
         frame = dataset_to_dataframe(dataset)
-        monthly = tuple(dataset[next(iter(dataset.data_vars))].dims) == MONTHLY_DIMS
-        times = dataset.time.values.copy()
-        steps = dataset.step.values.copy() if monthly else None
-        metadata = {
-            "dimensions": dict(dataset.sizes),
-            "variables": list(dataset.data_vars),
-            "units": {name: dataset[name].attrs.get("units") for name in dataset.data_vars},
-            "latitude": float(dataset.latitude.values[-1]),
-            "longitude": float(dataset.longitude.values[-1]),
-            "route": "monthly" if monthly else "yearly",
-            "time": times, "step": steps,
-            "reference_time": np.repeat(times, len(steps)) if monthly else times.copy(),
-            "step_hours": np.tile(steps / np.timedelta64(1, "h"), len(times)) if monthly else None,
-            "row_count": len(frame),
-            "missing": {name: int(frame[name].isna().sum()) for name in dataset.data_vars},
-        }
+        metadata = dataset_metadata(dataset, frame)
     return frame, metadata
 
 
@@ -154,7 +159,38 @@ def main(argv=None):
     parser.add_argument("--data-type", help="GRIB dataType filter, e.g. fc, em, es")
     parser.add_argument("--number-of-points", type=positive_integer,
                         help="GRIB numberOfPoints filter")
+    parser.add_argument("--list-groups", action="store_true", help="List groups found in real message headers")
+    parser.add_argument("--all-groups", action="store_true", help="Explicitly process all groups (default)")
+    parser.add_argument("--group", action="append", help="Process this discovered group ID; repeat for a subset")
+    parser.add_argument("--legacy-single", action="store_true", help="Use the original single-dataset CLI and filenames")
     args = parser.parse_args(argv)
+    if args.legacy_single and (args.list_groups or args.all_groups or args.group):
+        parser.error("--legacy-single cannot be combined with group options")
+    if not args.legacy_single:
+        from grib_groups import canonical, discover_groups, export_groups, select_groups
+        try:
+            discovery = discover_groups(args.input)
+            groups = select_groups(discovery, args.data_type, args.number_of_points, args.group)
+        except (OSError, ValueError) as exc:
+            parser.exit(1, f"Discovery failed: {exc}\n")
+        for error in discovery.errors:
+            print(f"Discovery incomplete: {error}")
+        if not groups:
+            parser.exit(1, "No groups match the selected filters.\n")
+        if args.list_groups:
+            for group in groups:
+                print(f"{group.label.replace(' · ', ' | ')}\n  filter_by_keys={canonical(group.filters)}\n"
+                      f"  parameters={', '.join(group.parameters)}; messages={len(group.messages)}")
+            return 0 if discovery.complete else 1
+        directory = args.output_dir or args.input.parent / f"output_{args.input.stem}"
+        results = export_groups(args.input, groups, directory)
+        for result in results:
+            if result.error:
+                print(f"FAILED {result.group.label.replace(' · ', ' | ')}: {result.error}")
+            else:
+                print(f"EXPORTED {result.group.label.replace(' · ', ' | ')}: {len(result.frame)} rows; route={result.metadata['route']}")
+                print(f"CSV: {result.csv_path.resolve()}\nXLSX: {result.xlsx_path.resolve()}")
+        return 0 if discovery.complete and all(result.error is None for result in results) else 1
     try:
         frame, csv_path, xlsx_path = convert_grib(
             args.input, args.output_dir, args.data_type, args.number_of_points)

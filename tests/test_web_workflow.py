@@ -25,6 +25,7 @@ from grib_to_csv import convert_grib, read_grib
 from web_workflow import (filters_from_inputs, local_source, plot_data, preview_batch,
                           process_batch, results_zip, safe_label, scan_folder,
                           selection_signature, sync_session, uploaded_sources)
+from grib_fixtures import message
 
 SAMPLE = None
 NO_FILTER = filters_from_inputs()
@@ -189,8 +190,8 @@ class AppStateTests(unittest.TestCase):
         self.assertEqual(app.session_state["previews"], [])
         widget(app.button, "Lihat cuplikan").click().run()
         self.assertFalse(app.exception)
-        self.assertEqual(len(app.dataframe[0].value), 20)
-        with patch("web_workflow.read_grib", side_effect=AssertionError("Unexpected reread")):
+        self.assertEqual(len(next(table.value for table in app.dataframe if "year" in table.value.columns)), 20)
+        with patch("web_workflow.read_group", side_effect=AssertionError("Unexpected reread")):
             widget(app.button, "Proses berkas terpilih").click().run()
             self.assertFalse(app.exception)
             results = app.session_state["results"]
@@ -203,6 +204,7 @@ class AppStateTests(unittest.TestCase):
         widget(app.text_input, "dataType").set_value("es").run()
         self.assertEqual(app.session_state["results"], [])
         self.assertEqual(app.session_state["previews"], [])
+        self.assertEqual(app.session_state["discoveries"], [])
         widget(app.button, "Proses berkas terpilih").click().run()
         self.assertFalse(app.exception)
         self.assertTrue(app.error)
@@ -224,14 +226,12 @@ class AppStateTests(unittest.TestCase):
         self.assertTrue(app.error)
 
     def test_directory_uploader_and_partial_errors(self):
-        frame, metadata = synthetic_read()
         app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=60).run()
         app.radio[0].set_value("Unggah folder").run()
         self.assertTrue(app.file_uploader[0].accept_directory)
-        app.file_uploader[0].set_value([("folder/a.grb2", b"valid", "application/octet-stream"),
+        app.file_uploader[0].set_value([("folder/a.grb2", message(), "application/octet-stream"),
                                         ("folder/b.grib", b"broken", "application/octet-stream")]).run()
-        with patch("web_workflow.read_grib", side_effect=[(frame, metadata), ValueError("corrupt")]):
-            widget(app.button, "Proses berkas terpilih").click().run()
+        widget(app.button, "Proses berkas terpilih").click().run()
         self.assertFalse(app.exception)
         self.assertTrue(app.success)
         self.assertTrue(app.error)

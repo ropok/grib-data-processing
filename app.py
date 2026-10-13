@@ -1,14 +1,17 @@
 """Indonesian local browser interface for the notebook-compatible converter."""
 
 from pathlib import Path
+from hashlib import sha256
 
 import altair as alt
 import pandas as pd
 import streamlit as st
 
-from web_workflow import (filters_from_inputs, local_source, plot_data, preview_batch,
-                          process_batch, results_zip, scan_folder, selection_signature,
-                          sync_session, uploaded_sources)
+from web_workflow import (choices_from_discoveries, discover_source_groups,
+                          filters_from_inputs, group_batch, local_source, plot_data,
+                          results_zip, scan_folder, selection_signature,
+                          sync_group_selection, sync_session, uploaded_sources)
+from grib_groups import canonical
 
 st.set_page_config(page_title="Ruang GRIB", page_icon="🌦️", layout="wide")
 st.markdown("""
@@ -94,7 +97,7 @@ with st.container(border=True):
     else:
         selected = []
     with st.expander("Filter lanjutan (opsional)"):
-        st.write("Isi hanya jika Anda mengetahui kunci GRIB yang diperlukan. Kosong berarti membaca tanpa filter.")
+        st.write("Opsional untuk mempersempit discovery. Kosong berarti semua kelompok nyata; Anda dapat memilih kelompok dari daftar yang ditemukan.")
         first, second = st.columns(2)
         data_type = first.text_input("dataType", placeholder="Contoh: an, fc, em, es")
         points = second.text_input("numberOfPoints", placeholder="Contoh: 1639")
@@ -108,31 +111,74 @@ with st.container(border=True):
     signature = selection_signature(selected, filters, context + ("" if valid_filters else f":{data_type}:{points}"))
     changed = sync_session(st.session_state, signature)
     if changed and selected:
-        st.caption("Pilihan terbaru siap dibaca. Cuplikan dan hasil sebelumnya telah diperbarui sesuai sumber/filter ini.")
+        st.caption("Pilihan terbaru siap diperiksa; cuplikan dan hasil lama telah dibatalkan.")
+    inspect_groups = st.button("Periksa kelompok GRIB", disabled=not selected or not valid_filters,
+                                help="Membaca kunci pesan asli tanpa mendekode seluruh nilai.")
+    if inspect_groups:
+        with st.spinner("Memeriksa header kelompok..."):
+            st.session_state["discoveries"] = discover_source_groups(selected, filters)
+    discoveries = st.session_state.get("discoveries", [])
+    for report in discoveries:
+        if report.error:
+            st.error(f"{report.source.label}: discovery gagal.")
+            with st.expander(f"Detail discovery · {report.source.label}"):
+                st.code(report.error, language=None)
+        elif not report.discovery.complete:
+            if not report.discovery.groups:
+                st.error(f"{report.source.label}: tidak ada kelompok GRIB yang berhasil dibaca.")
+            st.warning(f"{report.source.label}: discovery tidak lengkap. Kelompok yang terbaca ditampilkan; sebagian input belum berhasil dipetakan.")
+            with st.expander(f"Detail discovery · {report.source.label}"):
+                st.write(report.discovery.errors)
+    choices = choices_from_discoveries(discoveries)
+    if choices:
+        st.dataframe(pd.DataFrame([{"Sumber": choice.source.label, "Group ID": choice.group.identity,
+                                     "dataType": choice.group.filters.get("dataType", "unknown"),
+                                     "numberOfPoints": choice.group.filters.get("numberOfPoints", "unknown"),
+                                     "Parameter": ", ".join(choice.group.parameters),
+                                     "Pesan": len(choice.group.messages),
+                                     "filter_by_keys": canonical(choice.group.filters)} for choice in choices]),
+                     hide_index=True, width="stretch")
+        choices_by_id = {choice.identity: choice for choice in choices}
+        widget_key = sha256(repr(signature).encode()).hexdigest()[:16]
+        group_ids = st.multiselect("Kelompok yang dipilih", list(choices_by_id), default=list(choices_by_id),
+                                  format_func=lambda key: choices_by_id[key].label, key=f"groups_{widget_key}")
+        chosen_groups = [choices_by_id[key] for key in group_ids]
+        st.caption(f"{len(chosen_groups)} dari {len(choices)} kelompok dipilih. Semua menjadi pilihan awal. filterKey adalah pasangan nama kunci dan nilai dari pesan GRIB.")
+    else:
+        chosen_groups = []
+        if discoveries:
+            st.error("Tidak ada kelompok yang cocok dengan sumber/filter ini.")
+    sync_group_selection(st.session_state, chosen_groups)
     preview_column, process_column = st.columns(2)
-    see_preview = preview_column.button("Lihat cuplikan", disabled=not selected or not valid_filters,
+    can_act = bool(selected) and valid_filters and (not discoveries or bool(chosen_groups))
+    see_preview = preview_column.button("Lihat cuplikan", disabled=not can_act,
                                         width="stretch")
     process = process_column.button("Proses berkas terpilih", type="primary",
-                                     disabled=not selected or not valid_filters, width="stretch")
+                                     disabled=not can_act, width="stretch")
+    action = "preview" if see_preview else "process" if process else st.session_state.pop("pending_action", None)
+    if action and not discoveries:
+        with st.spinner("Menemukan seluruh kelompok sebelum membaca data..."):
+            st.session_state["discoveries"] = discover_source_groups(selected, filters)
+        st.session_state["pending_action"] = action
+        st.rerun()
 
-if see_preview or process:
-    action = "Membaca cuplikan" if see_preview else "Memproses berkas"
-    with st.status(action, expanded=True) as status:
+if action and chosen_groups:
+    with st.status("Membaca cuplikan kelompok" if action == "preview" else "Memproses kelompok", expanded=True) as status:
         def report_progress(outcome):
-            status.write(f"{'Selesai' if outcome.error is None else 'Perlu diperiksa'} · {outcome.source.label}")
-        if see_preview:
-            st.session_state["previews"] = preview_batch(selected, filters, report_progress)
+            status.write(f"{'Selesai' if outcome.error is None else 'Perlu diperiksa'} · {outcome.label}")
+        if action == "preview":
+            st.session_state["previews"] = group_batch(chosen_groups, progress=report_progress)
         else:
-            st.session_state["results"] = process_batch(
-                selected, filters, st.session_state.get("previews", []), report_progress)
-        status.update(label="Pembacaan cuplikan selesai" if see_preview else "Pemrosesan selesai",
+            st.session_state["results"] = group_batch(chosen_groups, export=True,
+                                                       previews=st.session_state.get("previews", []), progress=report_progress)
+        status.update(label="Pembacaan cuplikan selesai" if action == "preview" else "Pemrosesan kelompok selesai",
                       state="complete", expanded=False)
 
 outcomes = st.session_state.get("results") or st.session_state.get("previews") or []
 for outcome in outcomes:
     if outcome.error:
-        st.error(f"{outcome.source.label}: {outcome.error}")
-        with st.expander(f"Detail masalah · {outcome.source.label}"):
+        st.error(f"{outcome.label}: {outcome.error}")
+        with st.expander(f"Detail masalah · {outcome.label}"):
             st.code(outcome.technical_error, language=None)
 successful = [outcome for outcome in outcomes if outcome.error is None]
 exported = [outcome for outcome in st.session_state.get("results", []) if outcome.error is None]
@@ -140,25 +186,25 @@ exported = [outcome for outcome in st.session_state.get("results", []) if outcom
 if exported:
     with st.container(border=True):
         st.subheader("Unduh hasil")
-        st.success(f"{len(exported)} dari {len(st.session_state['results'])} berkas berhasil diproses.")
+        st.success(f"{len(exported)} dari {len(st.session_state['results'])} kelompok berhasil diproses.")
         for outcome in exported:
-            st.markdown(f"**{outcome.source.label}** · {len(outcome.frame):,} baris")
+            st.markdown(f"**{outcome.label}** · {len(outcome.frame):,} baris")
             csv_column, excel_column = st.columns(2)
             csv_column.download_button("Unduh CSV", outcome.csv_bytes, outcome.csv_name,
-                                       "text/csv", key=f"csv_{outcome.source.identity}", on_click="ignore")
+                                       "text/csv", key=f"csv_{outcome.identity}", on_click="ignore")
             excel_column.download_button("Unduh Excel", outcome.xlsx_bytes, outcome.xlsx_name,
                                          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                         key=f"xlsx_{outcome.source.identity}", on_click="ignore")
+                                         key=f"xlsx_{outcome.identity}", on_click="ignore")
         st.download_button("Unduh semua hasil (ZIP)", results_zip(exported), "hasil-grib.zip",
                            "application/zip", on_click="ignore", type="primary")
-        st.caption("ZIP memberi folder unik untuk setiap sumber, termasuk berkas yang memiliki nama sama.")
+        st.caption("ZIP memberi folder unik per sumber dan kelompok, termasuk berkas yang memiliki nama sama.")
 
 if successful:
     with st.container(border=True):
         st.subheader("Periksa data")
-        available = {outcome.source.identity: outcome for outcome in successful}
+        available = {outcome.identity: outcome for outcome in successful}
         chosen = st.selectbox("Berkas untuk diperiksa", list(available),
-                              format_func=lambda key: available[key].source.label)
+                              format_func=lambda key: available[key].label)
         outcome = available[chosen]
         frame, metadata = outcome.frame, outcome.metadata
         rows, variables, missing = st.columns(3)

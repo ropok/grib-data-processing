@@ -5,6 +5,9 @@ Anda bisa mengunggah berkas, mengunggah folder, atau memilih folder lokal,
 memeriksa 20 baris pertama, memproses beberapa sumber, dan mengunduh CSV/Excel.
 Script CLI yang lama tetap tersedia.
 
+[Panduan lengkap PDF](panduan-pengguna.pdf) memuat ilustrasi memulai aplikasi,
+memilih sumber, melihat cuplikan, serta mengunduh dan membaca grafik.
+
 ## Persiapan dan mulai
 
 Gunakan Python 3.11. Dari folder proyek, siapkan environment jika belum ada,
@@ -47,13 +50,32 @@ unggahan tidak dipakai langsung sebagai path tulis. Hasil sementara memakai
 folder milik aplikasi; file dengan nama sama dari folder berbeda tetap memiliki
 hasil dan folder ZIP yang berbeda.
 
+## Temukan dan pilih kelompok nyata
+
+Klik **Periksa kelompok GRIB** setelah memilih sumber. ecCodes membaca header
+setiap pesan; tabel berisi source/group ID, dataType, numberOfPoints, parameter,
+jumlah pesan, dan `filter_by_keys`. filterKey berarti pasangan nama kunci/nilai,
+bukan properti baru. Kombinasi yang tidak ada tidak ditampilkan.
+
+**Semua kelompok dipilih secara default** pada **Kelompok yang dipilih**; pilih
+subset bila perlu. Preview/proses langsung juga menemukan dan memakai semua.
+Hapus semua pilihan untuk menonaktifkan tombol. Geometri, level, jenis step,
+dan cakupan parameter yang tidak kompatibel dipisahkan; tiap pesan masuk tepat
+satu kelompok. Pembacaan strict memakai salinan pesan asli, bukan filter luas.
+`filter_by_keys` menjelaskan identitas header yang ditemukan.
+
+Yearly/monthly ditentukan per kelompok; time skalar boleh menjadi satu waktu.
+Dimensi unsupported dan duplikasi ambigu dilaporkan; kelompok lain diteruskan.
+Discovery input terpotong ditandai tidak lengkap. ZIP mempunyai subfolder per
+sumber/kelompok; nama output menyertakan dataType, numberOfPoints, dan group ID.
+
 ## Periksa, proses, lalu unduh
 
-1. Pilih berkas yang diperlukan pada **Berkas yang dipilih**.
+1. Pilih berkas pada **Berkas yang dipilih**, lalu periksa/pilih kelompoknya.
 2. Klik **Lihat cuplikan**. Pilih hasil yang ingin diperiksa; tabel menampilkan
    20 baris pertama, jumlah baris/variabel/nilai kosong, serta koordinat terakhir.
-3. Klik **Proses berkas terpilih** untuk menyiapkan hasil ekspor. Berkas diproses
-   satu per satu; bila ada kegagalan, berkas lainnya tetap diteruskan. Detail
+3. Klik **Proses berkas terpilih** untuk menyiapkan hasil ekspor. Kelompok diproses
+   satu per satu; bila ada kegagalan, kelompok lainnya tetap diteruskan. Detail
    masalah tersedia pada expander di bawah pesan ringkas.
 4. Unduh **CSV**, **Excel**, atau **semua hasil (ZIP)** yang berhasil.
 
@@ -63,7 +85,8 @@ Mengubah variabel grafik atau mengunduh tidak mendekode GRIB lagi. Hasil disimpa
 dalam sesi; simpan unduhan sebelum menutup atau memuat ulang sesi browser.
 
 **Filter lanjutan** opsional: isi `dataType` dan/atau `numberOfPoints` hanya bila
-Anda mengetahui kunci yang tepat. Nilai kosong berarti tanpa filter. Aplikasi
+Anda mengetahui kunci yang tepat. Kosong berarti semua kelompok; isian
+mempersempit discovery. Aplikasi
 tidak menebak filter, menggabungkan kelompok pesan, atau mengubah susunan dimensi
 yang tidak didukung. Jika gagal, sertakan pesan teknis saat meminta bantuan.
 
@@ -107,4 +130,6 @@ Aktifkan **Lihat grafik**, pilih satu variabel, lalu atur rentang baris bila per
 Pengujian mencakup AppTest unggahan/folder/proses/grafik/perubahan filter,
 input tidak valid, partial errors, nama yang tidak aman, nama duplikat dalam ZIP,
 perubahan file lokal, serta kesamaan download dengan CLI. Metadata/plot monthly
-diuji sintetis karena sampel GRIB lokal hanya memiliki jalur yearly.
+diuji sintetis dan melalui GRIB buatan ecCodes; sampel GRIB pengguna tetap
+yearly. Jalankan juga `tests/test_grib_groups.py` dengan `--sample` dan path
+sampel untuk partition, CLI default semua, subset, dan state antarmuka kelompok.

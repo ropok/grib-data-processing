@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 
 from grib_to_csv import export_dataframe, output_stem, read_grib
+from grib_groups import canonical, discover_groups, group_output_stem, read_group, select_groups
 
 GRIB_EXTENSIONS = {".grib", ".grb", ".grib2", ".grb2"}
 RESERVED_NAMES = {"CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$",
@@ -114,6 +115,7 @@ def sync_session(state, signature):
         state["source_signature"] = signature
         state["previews"] = []
         state["results"] = []
+        state["discoveries"] = []
         return True
     return False
 
@@ -130,6 +132,15 @@ class Outcome:
     csv_bytes: bytes | None = None
     xlsx_name: str | None = None
     xlsx_bytes: bytes | None = None
+    group: object = None
+
+    @property
+    def identity(self):
+        return f"{self.source.identity}-{self.group.identity}" if self.group else self.source.identity
+
+    @property
+    def label(self):
+        return f"{self.source.label} · {self.group.label}" if self.group else self.source.label
 
 
 def _read_source(source, directory, filters):
@@ -205,9 +216,105 @@ def results_zip(outcomes):
         for result in outcomes:
             if result.error is None and result.csv_bytes is not None:
                 folder = result.source.identity
+                if result.group:
+                    folder += f"/{result.group.identity}"
                 archive.writestr(f"{folder}/{result.csv_name}", result.csv_bytes)
                 archive.writestr(f"{folder}/{result.xlsx_name}", result.xlsx_bytes)
     return buffer.getvalue()
+
+
+@dataclass
+class SourceDiscovery:
+    source: Source
+    discovery: object = None
+    groups: list = None
+    error: str = None
+
+
+@dataclass(frozen=True)
+class GroupChoice:
+    source: Source
+    group: object
+
+    @property
+    def identity(self):
+        return f"{self.source.identity}-{self.group.identity}"
+
+    @property
+    def label(self):
+        return f"{self.source.label} · {self.group.label}"
+
+    @property
+    def cache_key(self):
+        return (self.source.identity, self.source.fingerprint, self.group.identity,
+                canonical(self.group.filters))
+
+
+def _source_path(source, directory):
+    if source.path is not None:
+        if local_fingerprint(source.path) != source.fingerprint:
+            raise ValueError("Berkas berubah sejak dipilih. Periksa kelompok ulang.")
+        return source.path
+    path = directory / f"{source.identity}.grib"
+    if not path.exists():
+        path.write_bytes(source.payload)
+    return path
+
+
+def discover_source_groups(sources, filters):
+    reports = []
+    with TemporaryDirectory(prefix="grib-discovery-") as temporary:
+        for source in sources:
+            try:
+                discovery = discover_groups(_source_path(source, Path(temporary)))
+                groups = select_groups(discovery, **filters)
+                reports.append(SourceDiscovery(source, discovery, groups))
+            except Exception as exc:
+                reports.append(SourceDiscovery(source, error=f"{type(exc).__name__}: {exc}"))
+    return reports
+
+
+def choices_from_discoveries(reports):
+    return [GroupChoice(report.source, group) for report in reports if report.groups
+            for group in report.groups]
+
+
+def sync_group_selection(state, choices):
+    signature = tuple(choice.cache_key for choice in choices)
+    if state.get("group_signature") != signature:
+        state["group_signature"] = signature
+        state["previews"] = []
+        state["results"] = []
+
+
+def group_batch(choices, export=False, previews=(), progress=None):
+    cache = {(p.source.identity, p.source.fingerprint, p.group.identity, canonical(p.group.filters)): p
+             for p in previews if p.error is None and p.group is not None}
+    outcomes = []
+    with TemporaryDirectory(prefix="grib-web-groups-") as temporary:
+        directory = Path(temporary)
+        for choice in choices:
+            source, group = choice.source, choice.group
+            try:
+                path = _source_path(source, directory)
+                cached = cache.get(choice.cache_key)
+                if cached is not None:
+                    frame, metadata = cached.frame, cached.metadata
+                else:
+                    frame, metadata = read_group(path, group)
+                outcome = Outcome(source, frame=frame, metadata=metadata, group=group)
+                if export:
+                    stem = directory / source.identity / group.identity / group_output_stem(source.label, group)
+                    csv, xlsx = export_dataframe(frame, stem)
+                    outcome.csv_name, outcome.xlsx_name = csv.name, xlsx.name
+                    outcome.csv_bytes, outcome.xlsx_bytes = csv.read_bytes(), xlsx.read_bytes()
+            except Exception as exc:
+                outcome = _failure(source, exc)
+                outcome.group = group
+            outcomes.append(outcome)
+            if progress:
+                progress(outcome)
+    return outcomes
 
 
 def plot_data(frame, metadata, variable, reference_time=None, row_range=None):
