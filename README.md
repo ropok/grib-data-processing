@@ -1,38 +1,70 @@
 # grib-data-processing
 
-Konversi satu file GRIB menjadi CSV dan Excel dengan `grib_to_csv.py`. Script
+Konversi GRIB menjadi CSV dan Excel melalui browser lokal atau `grib_to_csv.py`. Script
 mempertahankan hasil pengolahan satu file pada `GribToCsv.ipynb`; notebook asli
 tetap tersedia sebagai referensi.
 
-Untuk panduan visual dari nol, baca [panduan pengguna PDF](docs/panduan-pengguna.pdf).
-Panduan mencakup instalasi Windows, unduhan proyek, menjalankan konversi, membaca
-hasil, dan contoh prompt Codex/AI browser. [Sumber LaTeX dan petunjuk rebuild](docs/README.md)
-tersedia untuk pengelola dokumentasi.
+**[Panduan lengkap PDF](docs/panduan-pengguna.pdf)** menjelaskan langkah visual
+dari nol, termasuk CLI, Ruang GRIB, dan bantuan AI. [Petunjuk antarmuka browser](docs/browser-interface.md)
+serta [sumber LaTeX/petunjuk rebuild](docs/README.md) juga tersedia.
 
-## Antarmuka browser lokal
+## Quickstart: jalankan Ruang GRIB
 
-Untuk mengunggah beberapa berkas/folder, memilih folder lokal, melihat cuplikan
-tabel, dan menampilkan rekomendasi grafik, gunakan **Ruang GRIB**. Dari folder
-proyek dengan `.venv` yang sudah tersedia:
+1. Pasang **Python 3.11** ([installer Windows 64-bit 3.11.9](https://www.python.org/downloads/release/python-3119/)).
+2. Unduh [ZIP branch development](https://github.com/ropok/grib-data-processing/archive/refs/heads/development.zip)
+   dan ekstrak. Gunakan **development**, bukan main, untuk fitur browser ini.
+   Buka folder yang langsung berisi `app.py`, `requirements-web.txt`, dan
+   `start-web.cmd`. File GRIB diperoleh terpisah; letakkan dalam `data` jika ingin.
+3. Buka PowerShell dari folder proyek. **Buat `.venv` hanya jika belum ada**:
+
+```powershell
+if (-not (Test-Path .venv\Scripts\python.exe)) { py -3.11 -m venv .venv }
+```
+
+Pasang paket web (sudah menyertakan paket inti) dan periksa pemasangannya:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements-web.txt
+.\.venv\Scripts\python.exe -m pip check
 ```
 
-Kemudian klik dua kali `start-web.cmd`, atau jalankan:
+4. Klik dua kali `start-web.cmd`, atau jalankan dari PowerShell:
 
 ```powershell
-.\.venv\Scripts\python.exe -m streamlit run app.py --server.address 127.0.0.1 --browser.gatherUsageStats false
+.\start-web.cmd
 ```
 
-Buka `http://127.0.0.1:8501`. Aplikasi berjalan pada komputer sendiri, memakai
-converter dan versi dependensi inti yang sama. Panduan lengkap tersedia dalam
-[panduan antarmuka browser](docs/browser-interface.md).
+5. Buka **http://127.0.0.1:8501** jika browser belum terbuka. Biarkan terminal
+   tetap terbuka. Pilih berkas/folder → **Periksa kelompok GRIB** (default semua)
+   → **Lihat cuplikan** → **Proses berkas terpilih**
+   → unduh **CSV/Excel/ZIP**. Simpan unduhan sebelum menutup sesi; tekan Ctrl+C
+   di terminal untuk menghentikan aplikasi.
+
+Opsional, konversi satu file lewat CLI:
+
+```powershell
+.\.venv\Scripts\python.exe grib_to_csv.py "data\PM 10 DAN PM 2,5 MENTAH.grib"
+```
+
+## Antarmuka browser lokal
+
+Ruang GRIB berjalan pada komputer sendiri, memakai converter dan dependensi
+inti yang sama. Tiga sumber tersedia: **Unggah berkas**, **Unggah folder**,
+dan **Folder lokal**. Batas unggahan 200 MB per berkas; pilih folder lokal untuk
+file lebih besar. Panduan rinci: [antarmuka browser](docs/browser-interface.md).
 
 Pilih sumber dan berkas, lalu klik **Lihat cuplikan** atau **Proses berkas terpilih**.
 Hasil CSV/Excel tersedia per berkas dan dalam ZIP. Pembacaan tidak berjalan
 otomatis saat Anda memilih data; kegagalan satu berkas tidak menghentikan berkas
 lain. Sumber tidak ditimpa, dan hasil web tidak ditulis ke folder input.
+
+Discovery membaca header ecCodes dan hanya menampilkan kombinasi nyata.
+**Kelompok yang dipilih** berisi semua pada awalnya; pilih subset bila perlu.
+dataType, numberOfPoints, geometri/level/step dan cakupan parameter menentukan
+partisi; tiap pesan masuk tepat satu kelompok. `filter_by_keys` adalah identitas
+header, sedangkan pembacaan strict memakai salinan pesan asli kelompok.
+Yearly/monthly ditentukan per kelompok. Dimensi unsupported, pesan duplikat
+ambigu, dan discovery tidak lengkap dilaporkan; kelompok lain tetap diproses.
 
 Grafik bersifat opsional: yearly memakai waktu referensi asli; monthly memilih
 satu waktu referensi dan memakai durasi step asli, termasuk pecahan jam dan
@@ -43,6 +75,7 @@ Verifikasi antarmuka dan backend:
 
 ```powershell
 .\.venv\Scripts\python.exe tests\test_web_workflow.py --sample "data\PM 10 DAN PM 2,5 MENTAH.grib"
+.\.venv\Scripts\python.exe tests\test_grib_groups.py --sample "data\PM 10 DAN PM 2,5 MENTAH.grib"
 ```
 
 ## Persiapan di Windows (PowerShell)
@@ -78,8 +111,8 @@ Hasil default berada di samping file input, dalam folder `output_<nama_file>`:
 
 ```text
 data/output_PM 10 DAN PM 2,5 MENTAH/
-  PM 10 DAN PM 2,5 MENTAH.csv
-  PM 10 DAN PM 2,5 MENTAH.xlsx
+  ...__dataType-an__numberOfPoints-1639__group-ID.csv
+  ...__dataType-an__numberOfPoints-1639__group-ID.xlsx
 ```
 
 File hasil dengan nama yang sama akan ditulis ulang. Untuk memilih folder lain:
@@ -88,8 +121,9 @@ File hasil dengan nama yang sama akan ditulis ulang. Untuk memilih folder lain:
 .\.venv\Scripts\python.exe grib_to_csv.py "data\PM 10 DAN PM 2,5 MENTAH.grib" --output-dir "data\hasil"
 ```
 
-GRIB yang berisi beberapa kelompok pesan dapat memerlukan filter sesuai kunci
-GRIB-nya. `dataType` dan `numberOfPoints` bisa diberikan sendiri atau bersama:
+CLI secara default memproses **semua kelompok nyata**. Periksa ID/kunci dengan
+`--list-groups`; pilih subset lewat `--group ID` (boleh diulang). `--all-groups`
+adalah alias eksplisit default. `dataType`/`numberOfPoints` mempersempit discovery:
 
 ```powershell
 .\.venv\Scripts\python.exe grib_to_csv.py "data\PM 10 DAN PM 2,5 MENTAH.grib" --data-type an --number-of-points 1639
@@ -97,8 +131,11 @@ GRIB-nya. `dataType` dan `numberOfPoints` bisa diberikan sendiri atau bersama:
 
 Contoh ini cocok dengan file sampel. File lain mungkin memakai `fc`, `em`, atau
 `es`, dan jumlah titik berbeda. Nama hasil menyertakan filter, misalnya
-`PM 10 DAN PM 2,5 MENTAH_an_1639.csv`. Folder default tetap memakai nama file
-input tanpa suffix filter. Lihat seluruh opsi dengan `--help`.
+`nama__dataType-an__numberOfPoints-1639__group-ID.csv`; pembeda level/step
+ditambahkan bila perlu. Folder default tetap memakai nama input. CLI menyimpan
+kelompok berhasil dan exit nonzero bila ada kegagalan/discovery tidak lengkap.
+`--legacy-single` memilih perilaku/nama CLI lama. API `read_grib`/`convert_grib`
+beserta signature/tuple tetap kompatibel. Lihat opsi lengkap dengan `--help`.
 
 ## Makna hasil dan batasan
 
@@ -118,10 +155,13 @@ input tanpa suffix filter. Lihat seluruh opsi dengan `--help`.
   referensi. Header Excel mengikuti referensi: tebal tanpa nama/ukuran font
   eksplisit, rata tengah horizontal dan atas vertikal, garis tipis di empat
   sisi, fill kosong, format `General`, serta proteksi sel terkunci/tidak tersembunyi.
-- Semua variabel harus memiliki salah satu susunan dimensi di atas. Dimensi
+- API legacy menuntut salah satu susunan dimensi di atas untuk semua variabel. Dimensi
   skalar, tambahan seperti `number`/`level`, atau susunan campuran ditolak dengan
   pesan yang menjelaskan dimensi ditemukan.
-- Konversi kelompok file dan sel eksperimen notebook tidak termasuk script ini.
+- Mode kelompok mempromosikan `time` skalar menjadi satu waktu; API legacy
+  tetap strict. `step` skalar memakai yearly; ensemble/member berdimensi dan
+  grid unsupported tidak ditransformasikan diam-diam.
+- Sel eksperimen notebook tidak dijalankan otomatis oleh script ini.
   Index sidecar `.idx` tidak dibuat; dataset ditutup setelah dibaca.
 
 ## Verifikasi kesamaan dengan notebook

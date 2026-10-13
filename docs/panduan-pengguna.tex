@@ -21,16 +21,17 @@
 \fancyhead[L]{\small\color{slate}GRIB ke CSV dan Excel}
 \fancyhead[R]{\small\color{teal}Panduan Windows}
 \fancyfoot[L]{\footnotesize 13 Oktober 2026}
-\fancyfoot[R]{\footnotesize\thepage\ / 12}
+\fancyfoot[R]{\footnotesize\thepage\ / \pageref{pg:last}}
 \renewcommand{\headrulewidth}{0.4pt}
 \setlength{\headheight}{14pt}
 \newtcolorbox{panel}[1]{colback=pale,colframe=blue,boxrule=0.5pt,arc=2mm,left=3mm,right=3mm,top=2mm,bottom=2mm,title={#1},fonttitle=\bfseries}
 \lstnewenvironment{terminal}{\lstset{basicstyle=\ttfamily\small,columns=fullflexible,keepspaces=true,showstringspaces=false,breaklines=false,backgroundcolor=\color{pale},frame=single,rulecolor=\color{pale},framesep=7pt,aboveskip=7pt,belowskip=7pt}}{}
 \newcommand{\step}[2]{\par\addvspace{2mm}\noindent\textcolor{teal}{\textbf{#1.}}\ \textbf{#2}\par\nobreak}
 \newcommand{\pagetitle}[3]{\clearpage{\color{teal}\small\bfseries LANGKAH #1}\par{\color{slate}\LARGE\bfseries #2}\par\vspace{2mm}#3\par\vspace{3mm}}
-\newcommand{\source}[1]{{\footnotesize\color{blue}Sumber: [#1], daftar tautan di halaman 12.}\par}
+\newcommand{\source}[1]{{\footnotesize\color{blue}Sumber: [#1], daftar tautan di halaman \pageref{pg:references}.}\par}
 \DeclareUrlCommand\code{\urlstyle{tt}}
 \begin{document}
+\label{pg:start}
 \color{ink}
 {\color{teal}\small\bfseries MULAI DARI NOL}\par
 {\color{slate}\Huge\bfseries GRIB menjadi\par CSV dan Excel}\par
@@ -41,7 +42,7 @@ Windows 64-bit \textbullet\ Python 3.11 \textbullet\ Pilihan bantuan AI\par
 \par\noindent\begin{tikzpicture}[node distance=9mm,>=Latex]
 \tikzset{box/.style={draw=blue,fill=pale,rounded corners=2mm,text width=38mm,minimum height=23mm,align=center,font=\small}}
 \node[box] (a) {\textbf{Data mentah}\\File \code{.grib}};
-\node[box,right=of a] (b) {\textbf{Konversi lokal}\\Script Python};
+\node[box,right=of a] (b) {\textbf{Konversi lokal}\\CLI atau Ruang GRIB};
 \node[box,right=of b] (c) {\textbf{Hasil tabel}\\CSV + Excel};
 \draw[->,thick,teal] (a)--(b);
 \draw[->,thick,teal] (b)--(c);
@@ -62,10 +63,10 @@ jalur manual cukup memakai Python, ZIP proyek, dan file GRIB.
 
 \textbf{Peta perjalanan}\par
 \begin{tabular}{@{}p{76mm}p{76mm}@{}}
-2\quad Pasang Python & 8\quad Pahami titik dan waktu\\[4pt]
-3\quad Unduh proyek & 9\quad Gunakan Codex desktop\\[4pt]
-4--5\quad Buka PowerShell; siapkan paket & 10\quad Gunakan AI di browser\\[4pt]
-6--7\quad Konversi; temukan hasil & 11--12\quad Atasi masalah; verifikasi
+\pageref{pg:python}\quad Pasang Python & \pageref{pg:semantics}\quad Pahami titik dan waktu\\[4pt]
+\pageref{pg:download}\quad Unduh proyek & \pageref{pg:web-start}--\pageref{pg:web-results}\quad Gunakan Ruang GRIB\\[4pt]
+\pageref{pg:powershell}--\pageref{pg:packages}\quad Siapkan terminal dan paket & \pageref{pg:codex}--\pageref{pg:ai-browser}\quad Bantuan AI\\[4pt]
+\pageref{pg:convert}--\pageref{pg:output}\quad Konversi lewat CLI & \pageref{pg:troubleshooting}--\pageref{pg:references}\quad Masalah dan verifikasi
 \end{tabular}\par
 \vfill
 \begin{panel}{Contoh yang dipakai sepanjang panduan}
@@ -75,6 +76,7 @@ kutip jika nama atau path mengandung spasi.
 \end{panel}
 
 \pagetitle{1}{Pasang Python 3.11}{Python adalah alat yang menjalankan script. Pasang sekali sebelum menyiapkan proyek.}
+\label{pg:python}
 \step{1}{Buka unduhan resmi}
 Klik \href{https://www.python.org/downloads/release/python-3119/}{Python 3.11.9 untuk Windows}.
 Di bagian \textbf{Files}, pilih \textbf{Windows installer (64-bit)}.
@@ -98,7 +100,7 @@ dipilih, lalu klik \textbf{Install Now} untuk pemasangan pengguna saat ini.
 \end{tikzpicture}\par
 \step{3}{Selesaikan pemasangan}
 Tunggu pesan sukses, klik \textbf{Close}, lalu tutup dan buka kembali terminal
-yang sudah terbuka. Cara membuka PowerShell ada di halaman 4.
+yang sudah terbuka. Cara membuka PowerShell ada di halaman \pageref{pg:powershell}.
 \begin{panel}{Mengapa versi ini?}
 Panduan memakai jalur Python 3.11 yang diuji pada proyek. Rilis 3.11.9 dipilih
 karena menyediakan installer Windows biasa. Ini \textbf{bukan klaim versi Python
@@ -108,6 +110,7 @@ saat mengikuti langkah pertama kali.
 \source{1, 2}
 
 \pagetitle{2}{Unduh proyek yang benar}{Ambil branch \textbf{development}, karena script hasil konversi berada pada branch ini.}
+\label{pg:download}
 \step{1}{Buka GitHub}
 Buka \href{https://github.com/ropok/grib-data-processing/tree/development}{halaman proyek pada branch development}.
 Pastikan pilihan branch bertuliskan \textbf{development}, lalu klik
@@ -132,7 +135,7 @@ Pindahkan folder proyek ke sana, lalu ubah namanya menjadi
 \code{grib-data-processing}. Jangan hanya membuka isi ZIP.
 Jika Documents Anda dialihkan ke OneDrive, gunakan lokasi Documents yang
 sebenarnya di Explorer. Salin alamat folder proyek itu untuk perintah
-\code{cd "alamat folder proyek"} di halaman berikutnya.
+\code{cd "alamat folder proyek"} di halaman \pageref{pg:powershell}.
 \step{3}{Periksa isi folder proyek}
 \begin{terminal}
 Documents\grib-data-processing\
@@ -151,6 +154,7 @@ folder yang benar-benar berisi kedua file tersebut. GRIB diperoleh terpisah.
 \source{3, 4}
 
 \pagetitle{3}{Buka PowerShell}{PowerShell adalah jendela untuk memberi perintah. Anda cukup menyalin baris yang disediakan.}
+\label{pg:powershell}
 \step{1}{Buka terminal biasa}
 Klik Start, ketik \textbf{PowerShell}, lalu buka \textbf{Windows PowerShell}.
 Windows Terminal dengan tab PowerShell juga bisa dipakai. Tidak perlu memilih
@@ -170,7 +174,7 @@ py -3.11 --version
 \begin{panel}{Tanda Anda siap melanjutkan}
 \code{pwd} menampilkan lokasi folder proyek. \code{dir} menampilkan
 \code{grib_to_csv.py} dan \code{requirements.txt}. Perintah terakhir menampilkan
-\code{Python 3.11.x}. Jika tidak, lihat halaman 11 sebelum melanjutkan.
+\code{Python 3.11.x}. Jika tidak, lihat halaman \pageref{pg:troubleshooting} sebelum melanjutkan.
 \end{panel}
 \textbf{Cara membaca jendela terminal}\par
 \par\noindent\begin{tikzpicture}
@@ -185,6 +189,7 @@ Ketik hanya perintah. Tunggu sampai prompt muncul kembali sebelum menjalankan
 perintah berikutnya. Teks lokasi hasil bisa berbeda menurut nama pengguna Anda.
 
 \pagetitle{4}{Siapkan paket proyek}{Environment \code{.venv} menyimpan alat khusus untuk proyek ini. Buat sekali; setelah itu gunakan kembali.}
+\label{pg:packages}
 \step{1}{Buat environment}
 Pastikan masih berada di folder proyek, lalu jalankan:
 \begin{terminal}
@@ -219,9 +224,10 @@ ke Python global.
 \end{tikzpicture}\par
 \vfill
 Jika ada tulisan \code{ERROR}, simpan seluruh pesan, termasuk perintah yang
-Anda jalankan. Panduan masalah umum ada di halaman 11.
+Anda jalankan. Panduan masalah umum ada di halaman \pageref{pg:troubleshooting}.
 
 \pagetitle{5}{Masukkan data dan konversi}{Contoh berikut menggunakan nama sampel. Sesuaikan jika nama file Anda berbeda.}
+\label{pg:convert}
 \step{1}{Buat folder data}
 Di File Explorer, buka folder proyek. Buat folder baru bernama \code{data}, lalu
 salin file GRIB dari pemilik data ke dalamnya. Jika folder sudah ada, gunakan
@@ -248,27 +254,35 @@ $inputFile = "data\PM 10 DAN PM 2,5 MENTAH.grib"
 .\.venv\Scripts\python.exe grib_to_csv.py $inputFile
 \end{terminal}
 \step{4}{Tunggu pesan sukses}
-Untuk sampel proyek, pesan ringkasnya adalah:
+CLI sekarang memproses semua kelompok yang ditemukan. Untuk sampel proyek,
+cuplikan pesan ringkasnya adalah (identitas disingkat):
 \begin{terminal}
-Exported 3168 rows; columns: year, month, day, hour, pm2p5, pm10
-CSV: ...\PM 10 DAN PM 2,5 MENTAH.csv
-XLSX: ...\PM 10 DAN PM 2,5 MENTAH.xlsx
+EXPORTED group ...: 3168 rows; route=yearly
+CSV: ...__dataType-an__numberOfPoints-1639__group-ID.csv
+XLSX: ...__dataType-an__numberOfPoints-1639__group-ID.xlsx
 \end{terminal}
+Setiap kelompok mempunyai hasil sendiri. Cara memeriksa dan memilih kelompok
+ada pada halaman \pageref{pg:web-groups}; mode lama tersedia lewat
+\code{--legacy-single} jika memang diperlukan.
 \begin{panel}{Untuk penggunaan berikutnya}
-Buka PowerShell, masuk lagi ke folder proyek (halaman 4), lalu ulangi langkah
+Buka PowerShell, masuk lagi ke folder proyek (halaman \pageref{pg:powershell}), lalu ulangi langkah
 di halaman ini untuk file baru. Environment tidak perlu dibuat ulang jika
 masih tersedia. Jumlah baris dan variabel file Anda bisa berbeda.
 \end{panel}
 
 \pagetitle{6}{Temukan dan buka hasil}{CSV dan Excel berisi tabel yang sama. Folder hasil default berada di samping file input.}
+\label{pg:output}
 \step{1}{Buka folder hasil di Explorer}
 \begin{terminal}
 data\
   PM 10 DAN PM 2,5 MENTAH.grib
   output_PM 10 DAN PM 2,5 MENTAH\
-    PM 10 DAN PM 2,5 MENTAH.csv
-    PM 10 DAN PM 2,5 MENTAH.xlsx
+    ...__dataType-an__numberOfPoints-1639__group-ID.csv
+    ...__dataType-an__numberOfPoints-1639__group-ID.xlsx
 \end{terminal}
+Tanda \code{...} hanya menyingkat nama sumber pada ilustrasi. File sebenarnya
+memakai nama sumber dan group ID hasil discovery, sehingga kelompok berbeda
+tidak menimpa satu sama lain.
 \step{2}{Buka Excel}
 Klik dua kali file \code{.xlsx}. Jika Windows meminta aplikasi, pilih Excel
 atau aplikasi spreadsheet yang mendukung XLSX. Baris pertama berisi nama kolom;
@@ -291,7 +305,7 @@ XLSX paling mudah untuk melihat tabel di Excel. CSV adalah teks dengan pemisah
 koma; bisa dibuka di editor teks atau diimpor melalui menu \textbf{Data / From
 Text/CSV} pada aplikasi spreadsheet. Jika CSV tampak menjadi satu kolom, pilih
 pemisah koma saat mengimpor. Anda juga bisa mengunggah hasil ke AI browser untuk
-dibantu membaca tabel (halaman 10).
+dibantu membaca tabel (halaman \pageref{pg:ai-browser}).
 \par\textbf{Angka sangat kecil tetap dipertahankan.} Misalnya
 \code{3.2129265e-08} berarti $3.2129265\times10^{-8}$, bukan error.
 Periksa satuan aslinya sebelum menafsirkannya sebagai konsentrasi tertentu.
@@ -301,7 +315,7 @@ Salin hasil lama ke folder lain jika ingin menyimpannya sebelum mengulang
 konversi. Tutup file XLSX yang sedang dibuka di Excel sebelum menjalankan ulang.
 \end{panel}
 \textbf{Opsional: pilih folder hasil yang lebih singkat}\par
-Gunakan variabel \code{$inputFile} dari halaman sebelumnya:
+Gunakan variabel \code{$inputFile} dari halaman \pageref{pg:convert}:
 \begin{terminal}
 .\.venv\Scripts\python.exe grib_to_csv.py $inputFile --output-dir "data\hasil"
 \end{terminal}
@@ -309,6 +323,7 @@ Salin seluruh perintah pada satu baris. Hasilnya disimpan dalam
 \code{data\hasil} dengan nama file yang sama seperti contoh.
 
 \pagetitle{7}{Pahami titik dan kolom waktu}{Konversi menjaga cara baca notebook. Memahami maknanya mencegah salah menafsirkan tabel.}
+\label{pg:semantics}
 \textbf{Titik lokasi: koordinat terakhir pada kedua sumbu}\par
 Script mengambil satu titik untuk tiap waktu, yaitu latitude terakhir dan
 longitude terakhir. Ini bukan rata-rata seluruh wilayah. Pada sampel, titiknya
@@ -347,9 +362,168 @@ Script tidak mengganti tanggal menjadi tanggal \code{valid_time}. Jangan
 menganggap \code{hour=27} sebagai kesalahan atau mengubahnya ke jam 03 sendiri.
 Satuan variabel dan zona waktu harus diperiksa dari metadata GRIB atau pemilik
 data; jangan menganggap semua data memakai satuan tertentu atau WIB.
-Sampel lokal memiliki jalur yearly; monthly sejauh ini diuji dengan data sintetis.
+Sampel lokal memiliki jalur yearly. Jalur monthly juga diuji melalui GRIB kecil
+buatan ecCodes; ini bukan tambahan sampel observasi nyata.
 
-\pagetitle{8}{Minta Codex mengerjakan lokal}{Codex desktop dapat membantu di folder proyek yang Anda pilih, sesuai akses dan persetujuan sesi.}
+\pagetitle{8}{Mulai Ruang GRIB}{Ruang GRIB adalah antarmuka browser lokal proyek ini. Anda memilih data melalui tombol; tidak perlu mengetik perintah konversi untuk setiap file.}
+\label{pg:web-start}
+\step{1}{Pasang paket web sekali}
+Buka PowerShell pada folder proyek (halaman \pageref{pg:powershell}). Gunakan
+\code{.venv} yang sudah dibuat; jika belum ada, buat sesuai halaman
+\pageref{pg:packages}. Jalankan satu perintah setiap kali:
+\begin{terminal}
+.\.venv\Scripts\python.exe -m pip install -r requirements-web.txt
+.\.venv\Scripts\python.exe -m pip check
+\end{terminal}
+\code{requirements-web.txt} sudah menyertakan paket inti converter; Anda tidak
+perlu memasangnya dua kali. Pesan pemeriksaan yang diharapkan:
+\code{No broken requirements found.}
+\step{2}{Jalankan launcher}
+Klik dua kali \code{start-web.cmd} di Explorer, atau jalankan dari PowerShell:
+\begin{terminal}
+.\start-web.cmd
+\end{terminal}
+Launcher memeriksa environment dan paket. Jika belum lengkap, ia menunjukkan
+perintah persiapan, bukan memasang paket diam-diam setiap peluncuran.
+\step{3}{Buka alamat lokal}
+Jika browser belum terbuka otomatis, buka
+\href{http://127.0.0.1:8501}{http://127.0.0.1:8501}. Bila port bawaan sedang
+dipakai, ikuti alamat aktual yang dicetak pada terminal.
+\vspace{2mm}
+\par\noindent\begin{tikzpicture}[node distance=13mm,>=Latex]
+\node[draw=blue,fill=pale,rounded corners,text width=61mm,minimum height=24mm,align=center] (a) {\textbf{Jendela terminal}\\Menjalankan aplikasi};
+\node[draw=teal,fill=pale,rounded corners,text width=61mm,minimum height=24mm,align=center,right=of a] (b) {\textbf{Browser lokal}\\Memilih data dan hasil};
+\draw[->,thick,teal] (a)--(b);
+\end{tikzpicture}\par
+\vspace{3mm}
+\begin{panel}{Biarkan terminal tetap terbuka}
+Terminal menjalankan aplikasi selama Anda bekerja di browser. Untuk selesai,
+simpan unduhan lalu tekan \textbf{Ctrl+C} pada terminal. Menutup terminal akan
+menghentikan aplikasi. Ruang GRIB tidak membutuhkan akun AI atau API key.
+\end{panel}
+\source{3}
+
+\pagetitle{9}{Kenali dan pilih kelompok GRIB}{Satu file dapat memuat beberapa kombinasi filter. Aplikasi menemukan pesan yang benar-benar ada, bukan menebak daftar fc/em/es.}
+\label{pg:web-groups}
+\step{1}{Periksa kelompok setelah memilih sumber}
+Pilih sumber seperti pada halaman \pageref{pg:web-input}, lalu klik
+\textbf{Periksa kelompok GRIB}. Tabel menampilkan sumber, group ID,
+\code{dataType}, \code{numberOfPoints}, parameter, jumlah pesan, dan identitas
+\code{filter_by_keys}. \textbf{filterKey} berarti pasangan nama kunci dan nilai;
+bukan properti GRIB baru.
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Sumber uji}&\textbf{dataType}&\textbf{numberOfPoints}\\
+\midrule
+GRIB uji titik&fc&15300\\
+GRIB uji titik&fc&3825\\
+GRIB uji campuran&em&4\\
+GRIB uji campuran&es&4\\
+\bottomrule
+\end{tabular}\par
+\footnotesize Contoh kombinasi yang diverifikasi pada GRIB buatan uji ecCodes.
+File Anda dapat memiliki kombinasi lain; tidak dibuat pasangan fiktif.
+\end{center}
+\step{2}{Biarkan semua atau pilih subset}
+Pada \textbf{Kelompok yang dipilih}, \textbf{semua kelompok menjadi pilihan
+awal}. Hapus pilihan yang tidak diperlukan jika hanya ingin beberapa filter.
+Langsung menekan preview/proses sebelum discovery juga menemukan kelompok lalu
+menggunakan semuanya. Jika semua pilihan dihapus, tombol baca/proses dinonaktifkan.
+\begin{panel}{Kelompok yang terlihat sama masih bisa berbeda}
+Geometri grid, level, jenis step, atau cakupan waktu antarvariabel dapat berbeda
+walau jumlah titik sama. Group ID membedakannya. Pesan dipartisi tepat sekali;
+kelompok dibaca dari salinan pesan aslinya, tidak dicampur dengan filter luas.
+\end{panel}
+\step{3}{Pahami jalur waktu dan kegagalan parsial}
+Yearly/monthly dipilih otomatis dari dimensi \emph{masing-masing kelompok},
+bukan nama file atau dataType. Dimensi yang tidak didukung dilaporkan gagal;
+kelompok lain tetap diproses. Discovery input
+terpotong ditandai tidak lengkap; pesan duplikat ambigu tidak dipilih diam-diam.
+Nama hasil selalu memuat \code{dataType}, \code{numberOfPoints}, dan group ID.
+
+\pagetitle{10}{Pilih sumber dan periksa cuplikan}{Tiga cara memasukkan data memakai converter yang sama. Pembacaan hanya berjalan setelah Anda menekan tombol.}
+\label{pg:web-input}
+\par\noindent\begin{tikzpicture}
+\draw[draw=blue,fill=pale,rounded corners] (0,0) rectangle (15.6,3.3);
+\node[anchor=west,font=\bfseries,text=slate] at (0.4,2.85) {Ruang GRIB / Pilih sumber data};
+\node[anchor=west,font=\small] at (0.4,2.2) {Unggah berkas \quad Unggah folder \quad Folder lokal};
+\draw[draw=blue,fill=white,rounded corners] (0.4,1.2) rectangle (10.3,1.85);
+\node[anchor=west,font=\small] at (0.6,1.53) {Lokasi folder GRIB};
+\node[draw=teal,fill=teal,text=white,rounded corners,font=\small] at (12.8,1.53) {Tampilkan berkas};
+\node[anchor=west,font=\small] at (0.4,0.72) {Berkas yang dipilih};
+\node[anchor=west,font=\footnotesize] at (0.4,0.22) {Ilustrasi; tampilan dapat berbeda. Label mengikuti aplikasi.};
+\end{tikzpicture}\par
+\step{1}{Pilih cara memasukkan data}
+\begin{itemize}[itemsep=2pt]
+\item \textbf{Unggah berkas}: pilih satu atau beberapa file GRIB.
+\item \textbf{Unggah folder}: pilih folder; GRIB di subfolder ikut diunggah.
+\item \textbf{Folder lokal}: tempel alamat folder pada komputer aplikasi.
+      Tanda kutip dari \emph{Copy as path} boleh dipakai. Centang
+      \textbf{Sertakan subfolder} jika perlu, lalu klik \textbf{Tampilkan berkas}.
+\end{itemize}
+Batas unggahan adalah \textbf{200 MB per berkas}. Untuk file lebih besar,
+gunakan Folder lokal. Ekstensi yang diterima: \code{.grib}, \code{.grb},
+\code{.grib2}, dan \code{.grb2}; isi file tetap harus GRIB yang dapat dibaca.
+\step{2}{Pilih berkas dan lihat cuplikan}
+Periksa \textbf{Berkas yang dipilih}, temukan/pilih kelompok (halaman
+\pageref{pg:web-groups}), lalu klik \textbf{Lihat cuplikan}.
+Panel \textbf{Periksa data} menampilkan 20 baris pertama, jumlah baris/variabel/
+nilai kosong, dan titik latitude/longitude terakhir. Ini cuplikan satu titik,
+bukan tabel seluruh grid. Pilihan preview selalu berlabel sumber, group ID,
+dataType, dan jumlah titik, sehingga setiap filter dapat diperiksa sendiri.
+\step{3}{Proses berkas yang dipilih}
+Klik \textbf{Proses berkas terpilih}. Tiap kelompok mempunyai status sendiri;
+jika satu kelompok gagal, kelompok lain tetap diproses. Buka detail masalah bila perlu.
+\begin{panel}{Filter hanya bila Anda mengetahui kuncinya}
+\textbf{Filter lanjutan (opsional)} memuat \code{dataType} dan
+\code{numberOfPoints}. Kosong berarti semua kelompok nyata; isian hanya
+mempersempit discovery. Perubahan sumber, pilihan kelompok, atau filter
+membatalkan cuplikan/hasil lama.
+\end{panel}
+
+\pagetitle{11}{Unduh hasil dan lihat grafik}{Hasil unduhan mempertahankan semantik converter. Grafik membantu membaca pola tanpa mengubah data ekspor.}
+\label{pg:web-results}
+\step{1}{Simpan CSV, Excel, atau ZIP}
+Pada \textbf{Unduh hasil}, pilih \textbf{Unduh CSV}, \textbf{Unduh Excel}, atau
+\textbf{Unduh semua hasil (ZIP)}. ZIP memberi folder unik per sumber/kelompok,
+termasuk nama file yang sama dari folder berbeda. Nama CSV/Excel memuat kunci
+filter dan group ID. Data sumber tidak ditimpa.
+Hasil web disimpan sementara dalam sesi, bukan di samping input:
+\textbf{unduh sebelum menutup atau memuat ulang sesi browser}.
+\step{2}{Aktifkan grafik opsional}
+Di \textbf{Periksa data}, centang \textbf{Lihat grafik}, pilih satu
+\textbf{Variabel grafik}, lalu atur \textbf{Rentang baris grafik} bila perlu.
+\begin{center}
+\begin{tikzpicture}[scale=0.85,>=Latex]
+\draw[->,blue] (0,0)--(12,0);
+\draw[->,blue] (0,0)--(0,2.4);
+\draw[teal,thick] (0.7,0.7)--(2.2,1.1)--(3.7,0.85);
+\draw[teal,thick] (7.2,1.3)--(8.7,1.75)--(10.4,1.45);
+\foreach \x/\y in {0.7/0.7,2.2/1.1,3.7/0.85,7.2/1.3,8.7/1.75,10.4/1.45} \fill[teal] (\x,\y) circle (2.5pt);
+\node[font=\small,align=center] at (5.4,1.65) {Nilai kosong:\\garis terputus};
+\node[font=\small] at (6,-0.45) {Waktu referensi atau durasi step};
+\node[font=\footnotesize] at (6,-0.95) {Ilustrasi pola dan gap, bukan hasil GRIB baru.};
+\end{tikzpicture}
+\end{center}
+\begin{itemize}[itemsep=3pt]
+\item \textbf{Yearly}: sumbu X memakai timestamp referensi asli.
+\item \textbf{Monthly}: pilih satu \textbf{Waktu referensi}; sumbu X memakai
+      durasi \code{step} asli. Misalnya 90 menit menjadi 1,5 jam, dan 27 jam
+      tetap 27. Kolom \code{hour} unduhan tetap jam bulat sesuai notebook.
+\item Garis membantu melihat tren/lonjakan, tetapi tidak menyambung NaN.
+      Waktu/step duplikat atau tidak berurutan memakai grafik titik.
+\item Satuan berasal dari metadata; tidak ada asumsi zona waktu atau ambang
+      interpretasi. Grafik monthly diuji dengan data sintetis dan GRIB buatan ecCodes.
+\end{itemize}
+\begin{panel}{Seluruh titik pada rentang digunakan}
+Bila rentang melebihi 5.000 titik, persempit rentang baris. Aplikasi tidak
+melakukan downsampling tersembunyi. Grafik dan format cuplikan ilmiah tidak
+mengubah presisi atau nilai pada CSV/Excel yang Anda unduh.
+\end{panel}
+
+\pagetitle{12}{Minta Codex mengerjakan lokal}{Codex desktop dapat membantu di folder proyek yang Anda pilih, sesuai akses dan persetujuan sesi.}
+\label{pg:codex}
 \step{1}{Pasang dan masuk ke aplikasi}
 Buka \href{https://learn.chatgpt.com/docs/windows/windows-app}{panduan aplikasi Windows resmi}.
 Gunakan tautan Microsoft Store pada panduan tersebut untuk mengunduh aplikasi,
@@ -362,8 +536,11 @@ yang dipilih berisi script, \code{README.md}, dan \code{AGENTS.md}.
 \step{3}{Kirim prompt lengkap}
 \begin{panel}{Prompt siap pakai}
 Saya bukan programmer. Baca AGENTS.md dan README.md di proyek ini. Tolong
-konversi file "data/PM 10 DAN PM 2,5 MENTAH.grib" menjadi CSV dan Excel.
-Gunakan Python 3.11 dan environment .venv; siapkan paket jika belum ada.
+jalankan Ruang GRIB di browser lokal. Gunakan Python 3.11 dan .venv yang ada;
+pasang requirements-web.txt jika perlu, lalu jalankan start-web.cmd.
+Saya ingin memilih folder data, memeriksa seluruh kelompok GRIB,
+melihat cuplikan per filter, mengunduh CSV/Excel,
+dan melihat grafik satu variabel. Jelaskan lokasi hasil dan makna waktunya.
 Ikuti aturan model: GPT 6 Astra medium untuk planning dan GPT 6.1 Sol high
 untuk pelaksanaan. Jika tidak tersedia, laporkan dan jangan mengganti
 model diam-diam. Pertahankan file asli. Jalankan prosesnya, lalu beri lokasi
@@ -381,7 +558,8 @@ Script converter sendiri tidak membutuhkan login OpenAI atau API key.
 \end{panel}
 \source{5, 6}
 
-\pagetitle{9}{Gunakan AI lewat browser}{AI browser membantu menjelaskan perintah dan membaca file yang Anda unggah. Path lokal saja tidak memberikan akses ke file.}
+\pagetitle{13}{Gunakan AI lewat browser}{Chat AI online membantu menjelaskan langkah dan membaca unggahan; ini berbeda dari antarmuka Ruang GRIB lokal pada halaman \pageref{pg:web-start}--\pageref{pg:web-results}.}
+\label{pg:ai-browser}
 \step{1}{Buka percakapan}
 Buka \href{https://chatgpt.com}{chatgpt.com} di browser, masuk, lalu buat chat.
 Sertakan README atau AGENTS yang Anda salin/unggah agar konteks proyek jelas.
@@ -415,17 +593,19 @@ Anda. Jika tidak didukung, jalankan script secara lokal dan unggah hasilnya.
 \end{panel}
 \source{7, 8}
 
-\pagetitle{10}{Jika ada masalah}{Mulai dari pesan yang terlihat. Jangan menghapus data atau memasang ulang semuanya sebagai langkah pertama.}
+\pagetitle{14}{Jika ada masalah}{Mulai dari pesan yang terlihat. Jangan menghapus data atau memasang ulang semuanya sebagai langkah pertama.}
+\label{pg:troubleshooting}
 \begin{tabular}{@{}p{49mm}p{108mm}@{}}
 \toprule
 \textbf{Pesan / keadaan}&\textbf{Yang dilakukan}\\
 \midrule
 \code{py} tidak dikenali&Periksa Python 3.11 sudah terpasang; buka terminal baru. Jika launcher tidak tersedia, gunakan path Python pada kotak di bawah.\\[6pt]
-Script atau requirements tidak ditemukan&Ulangi \code{cd} pada halaman 4; jalankan \code{dir}. Pastikan script langsung berada di folder itu, bukan dalam ZIP atau folder bertingkat.\\[6pt]
+Script atau requirements tidak ditemukan&Ulangi \code{cd} pada halaman \pageref{pg:powershell}; jalankan \code{dir}. Pastikan file ada langsung dalam folder proyek, bukan dalam ZIP.\\[6pt]
 Input file does not exist&Jalankan \code{dir data\*.grib}. Cocokkan nama, akhiran, spasi, dan path dalam tanda kutip.\\[6pt]
 \code{pip} gagal mengunduh&Periksa internet dan pesan proxy/firewall. Kirim error lengkap kepada AI/pendamping. Setelah penyebab diperbaiki, ulangi instalasi requirements.\\[6pt]
 Permission denied pada XLSX&Tutup file hasil di Excel. Jika folder tidak dapat ditulis, gunakan \code{--output-dir "data\hasil"}.\\[6pt]
-GRIB memerlukan filter / unsupported dimensions&Kirim pesan lengkap ke AI. Minta pemeriksaan kunci GRIB dan dimensi; jangan menebak filter atau mengubah data.\\
+GRIB memerlukan filter / unsupported dimensions&Kirim pesan lengkap ke AI. Minta pemeriksaan kunci GRIB dan dimensi; jangan menebak filter atau mengubah data.\\[6pt]
+Launcher / browser belum siap&Ikuti petunjuk paket pada launcher. Biarkan terminal terbuka; gunakan alamat aktual jika port 8501 dipakai. Langkah mulai ada pada halaman \pageref{pg:web-start}.\\
 \bottomrule
 \end{tabular}\par
 \vspace{3mm}
@@ -445,13 +625,15 @@ pada satu waktu. Pertahankan data asli; jangan menebak filter GRIB.
 \end{panel}
 \source{2}
 
-\pagetitle{11}{Periksa sebelum selesai}{Simpan file asli, hasil, dan catatan pemeriksaan agar proses bisa diulangi.}
+\pagetitle{15}{Periksa sebelum selesai}{Simpan file asli, hasil, dan catatan pemeriksaan agar proses bisa diulangi.}
+\label{pg:references}
 \begin{itemize}
 \item File CSV dan XLSX tersedia; nama dan foldernya sesuai input yang dipilih.
 \item Nama kolom, jumlah baris, titik grid, dan arti waktu dipahami.
 \item Hasil lama disalin jika perlu disimpan sebelum konversi berikutnya.
+\item Unduhan sesi Ruang GRIB disimpan sebelum browser/terminal ditutup.
 \item Sampel yang diuji menghasilkan 3.168 baris data dan enam kolom;
-      monthly baru memiliki bukti pengujian sintetis.
+      monthly diuji sintetis dan lewat GRIB buatan, bukan sampel observasi tambahan.
 \end{itemize}
 \begin{panel}{Prompt verifikasi dengan Codex lokal}
 Tolong buktikan hasil script sama dengan notebook asli pada sampel dalam data.
@@ -478,4 +660,5 @@ petunjuk terkait; isi teknis converter berasal dari README dan script proyek.
 Sumber panduan ini adalah \code{docs/panduan-pengguna.tex}; PDF dibangun dari
 sumber yang sama. Petunjuk rebuild ada di \code{docs/README.md}. Pengguna
 converter tidak perlu memasang LaTeX untuk mengikuti panduan.
+\label{pg:last}
 \end{document}

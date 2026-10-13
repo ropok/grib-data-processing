@@ -110,6 +110,20 @@ dengan bahasa sederhana. Panduan perintah lengkap ada di `README.md`.
   notebook dengan sampel lokal, serta `pip check`. Beri bukti verifikasi dan
   alamat browser lokal; jangan commit/push/PR/merge tanpa permintaan baru.
 
+- Mode kelompok browser dan CLI memproses semua kelompok nyata secara default.
+  Periksa header dengan `Periksa kelompok GRIB`/`--list-groups`; pilih subset
+  dari ID yang ditemukan, bukan kombinasi tebakan. `--data-type` dan
+  `--number-of-points` mempersempit discovery. `--legacy-single` adalah opt-in
+  perilaku CLI lama; API legacy tetap kompatibel.
+- Tiap pesan dimiliki tepat satu kelompok. Geometri/level/step dan cakupan
+  parameter menentukan pemisahan; decoder strict membaca salinan pesan asli.
+  Laporkan discovery tidak lengkap, duplikat ambigu dan dimensi unsupported.
+  Preview, status, grafik dan ZIP harus dibedakan per sumber/kelompok/filter.
+  Nama hasil selalu memuat dataType, numberOfPoints dan group ID.
+- Jalankan juga `tests/test_grib_groups.py` untuk perubahan discovery. Monthly
+  diverifikasi lewat fixture GRIB ecCodes dan dataset sintetis; jangan menyebut
+  fixture sebagai observasi pengguna tambahan. PDF memakai sumber yang sama.
+
 ### Contoh prompt yang bisa langsung dipakai
 
 > Tolong ubah file "data/PM 10 DAN PM 2,5 MENTAH.grib" menjadi CSV dan Excel.

@@ -127,7 +127,7 @@ class NotebookParity(unittest.TestCase):
         self.assert_parity("sample_yearly", reference, actual)
         cli_dir = directory / "cli"
         subprocess.run([sys.executable, str(ROOT / "grib_to_csv.py"), str(SAMPLE),
-                        "--output-dir", str(cli_dir)], check=True, capture_output=True, text=True)
+                        "--legacy-single", "--output-dir", str(cli_dir)], check=True, capture_output=True, text=True)
         self.assertEqual(actual[1].read_bytes(), (cli_dir / actual[1].name).read_bytes())
         self.assertEqual(worksheet_contents(actual[2]), worksheet_contents(cli_dir / actual[2].name))
 
