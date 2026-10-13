@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 import cfgrib
+import numpy as np
 import pandas as pd
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Protection, Side
 
@@ -74,8 +75,8 @@ def output_stem(input_path, data_type=None, number_of_points=None):
     return stem
 
 
-def convert_grib(input_path, output_dir=None, data_type=None, number_of_points=None):
-    """Convert one GRIB file; return its DataFrame and the two exported paths."""
+def read_grib(input_path, data_type=None, number_of_points=None):
+    """Read the notebook table and original coordinates without writing files."""
     input_path = Path(input_path)
     if not input_path.is_file():
         raise FileNotFoundError(f"GRIB input file does not exist: {input_path}")
@@ -87,10 +88,29 @@ def convert_grib(input_path, output_dir=None, data_type=None, number_of_points=N
     # Avoid cfgrib index sidecars and stale indexes when filters change.
     with cfgrib.open_dataset(str(input_path), filter_by_keys=filters, indexpath="") as dataset:
         frame = dataset_to_dataframe(dataset)
-    directory = (Path(output_dir) if output_dir is not None
-                 else input_path.parent / f"output_{input_path.stem}")
-    directory.mkdir(parents=True, exist_ok=True)
-    stem = directory / output_stem(input_path, data_type, number_of_points)
+        monthly = tuple(dataset[next(iter(dataset.data_vars))].dims) == MONTHLY_DIMS
+        times = dataset.time.values.copy()
+        steps = dataset.step.values.copy() if monthly else None
+        metadata = {
+            "dimensions": dict(dataset.sizes),
+            "variables": list(dataset.data_vars),
+            "units": {name: dataset[name].attrs.get("units") for name in dataset.data_vars},
+            "latitude": float(dataset.latitude.values[-1]),
+            "longitude": float(dataset.longitude.values[-1]),
+            "route": "monthly" if monthly else "yearly",
+            "time": times, "step": steps,
+            "reference_time": np.repeat(times, len(steps)) if monthly else times.copy(),
+            "step_hours": np.tile(steps / np.timedelta64(1, "h"), len(times)) if monthly else None,
+            "row_count": len(frame),
+            "missing": {name: int(frame[name].isna().sum()) for name in dataset.data_vars},
+        }
+    return frame, metadata
+
+
+def export_dataframe(frame, stem):
+    """Write both formats with the same LF and complete reference header style."""
+    stem = Path(stem)
+    stem.parent.mkdir(parents=True, exist_ok=True)
     csv_path, xlsx_path = Path(f"{stem}.csv"), Path(f"{stem}.xlsx")
     # Use the Colab reference's LF newlines on every operating system.
     frame.to_csv(csv_path, index=False, lineterminator="\n")
@@ -106,6 +126,17 @@ def convert_grib(input_path, output_dir=None, data_type=None, number_of_points=N
             cell.fill = PatternFill()
             cell.number_format = "General"
             cell.protection = Protection(locked=True, hidden=False)
+    return csv_path, xlsx_path
+
+
+def convert_grib(input_path, output_dir=None, data_type=None, number_of_points=None):
+    """Convert one GRIB file; return its DataFrame and the two exported paths."""
+    input_path = Path(input_path)
+    frame, _ = read_grib(input_path, data_type, number_of_points)
+    directory = (Path(output_dir) if output_dir is not None
+                 else input_path.parent / f"output_{input_path.stem}")
+    stem = directory / output_stem(input_path, data_type, number_of_points)
+    csv_path, xlsx_path = export_dataframe(frame, stem)
     return frame, csv_path, xlsx_path
 
 

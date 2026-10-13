@@ -9,6 +9,42 @@ Panduan mencakup instalasi Windows, unduhan proyek, menjalankan konversi, membac
 hasil, dan contoh prompt Codex/AI browser. [Sumber LaTeX dan petunjuk rebuild](docs/README.md)
 tersedia untuk pengelola dokumentasi.
 
+## Antarmuka browser lokal
+
+Untuk mengunggah beberapa berkas/folder, memilih folder lokal, melihat cuplikan
+tabel, dan menampilkan rekomendasi grafik, gunakan **Ruang GRIB**. Dari folder
+proyek dengan `.venv` yang sudah tersedia:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-web.txt
+```
+
+Kemudian klik dua kali `start-web.cmd`, atau jalankan:
+
+```powershell
+.\.venv\Scripts\python.exe -m streamlit run app.py --server.address 127.0.0.1 --browser.gatherUsageStats false
+```
+
+Buka `http://127.0.0.1:8501`. Aplikasi berjalan pada komputer sendiri, memakai
+converter dan versi dependensi inti yang sama. Panduan lengkap tersedia dalam
+[panduan antarmuka browser](docs/browser-interface.md).
+
+Pilih sumber dan berkas, lalu klik **Lihat cuplikan** atau **Proses berkas terpilih**.
+Hasil CSV/Excel tersedia per berkas dan dalam ZIP. Pembacaan tidak berjalan
+otomatis saat Anda memilih data; kegagalan satu berkas tidak menghentikan berkas
+lain. Sumber tidak ditimpa, dan hasil web tidak ditulis ke folder input.
+
+Grafik bersifat opsional: yearly memakai waktu referensi asli; monthly memilih
+satu waktu referensi dan memakai durasi step asli, termasuk pecahan jam dan
+durasi di atas 24 jam. Garis terputus pada nilai kosong; waktu berulang atau
+tidak berurutan memakai grafik titik. Grafik tidak mengubah tabel unduhan.
+
+Verifikasi antarmuka dan backend:
+
+```powershell
+.\.venv\Scripts\python.exe tests\test_web_workflow.py --sample "data\PM 10 DAN PM 2,5 MENTAH.grib"
+```
+
 ## Persiapan di Windows (PowerShell)
 
 Gunakan Python 3.11. Jalankan dari folder proyek:

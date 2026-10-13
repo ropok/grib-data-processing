@@ -90,6 +90,26 @@ dengan bahasa sederhana. Panduan perintah lengkap ada di `README.md`.
   PR kecuali diminta. Akhiri dengan hasil, lokasi file, bukti verifikasi, dan
   keterbatasan nyata; jangan berhenti hanya dengan memberi daftar perintah.
 
+### Saat menggunakan antarmuka browser lokal
+
+- Gunakan `requirements-web.txt` dalam `.venv` yang sama; jangan mengganti versi
+  inti converter. Jalankan `start-web.cmd` atau Streamlit pada `127.0.0.1`.
+  Panduan antarmuka ada di `docs/browser-interface.md`; tidak perlu deployment
+  web atau API key untuk memakai aplikasi ini.
+- Arahkan pengguna memilih Unggah berkas, Unggah folder, atau Folder lokal.
+  Folder lokal adalah alamat di komputer aplikasi. Preview/proses harus dipicu
+  tombol pengguna, dan perubahan input/filter harus membatalkan hasil lama.
+- Pertahankan sumber; keluaran web hanya pada penyimpanan sementara aplikasi
+  dan unduhan sesi. Untuk batch, teruskan berkas lainnya saat satu file gagal
+  dan laporkan status per berkas. Jangan menebak filter GRIB.
+- Grafik memakai waktu/step asli, satu variabel, dan satu referensi untuk monthly.
+  Jaga gap nilai kosong, pakai titik untuk waktu duplikat/tidak berurutan, serta
+  jangan menebak satuan, zona waktu, atau ambang interpretasi. Grafik tidak
+  mengubah data ekspor. Rentang besar harus dipersempit, bukan didownsample diam-diam.
+- Setelah perubahan antarmuka, jalankan `tests/test_web_workflow.py` dan parity
+  notebook dengan sampel lokal, serta `pip check`. Beri bukti verifikasi dan
+  alamat browser lokal; jangan commit/push/PR/merge tanpa permintaan baru.
+
 ### Contoh prompt yang bisa langsung dipakai
 
 > Tolong ubah file "data/PM 10 DAN PM 2,5 MENTAH.grib" menjadi CSV dan Excel.
@@ -108,3 +128,8 @@ dengan bahasa sederhana. Panduan perintah lengkap ada di `README.md`.
 > GPT 6 Astra medium, lalu implementasikan dengan GPT 6.1 Sol high pada branch
 > codex/[nama-fitur]. Pertahankan file lokal saya, jalankan pengujian yang relevan,
 > dan perbarui panduan setelah kode selesai. Jangan commit atau push dahulu.
+
+> Tolong jalankan antarmuka Ruang GRIB di browser lokal. Saya ingin memilih
+> folder data, melihat cuplikan tabel, mengunduh CSV/Excel, dan menampilkan grafik
+> satu variabel. Gunakan .venv dan requirements-web.txt, pertahankan sumber,
+> ikuti aturan model di atas, dan tunjukkan alamat aplikasi serta hasil verifikasi.
