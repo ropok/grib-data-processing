@@ -14,31 +14,30 @@ serta [sumber LaTeX/petunjuk rebuild](docs/README.md) juga tersedia.
 2. Unduh [ZIP branch development](https://github.com/ropok/grib-data-processing/archive/refs/heads/development.zip)
    dan ekstrak. Gunakan **development**, bukan main, untuk fitur browser ini.
    Buka folder yang langsung berisi `app.py`, `requirements-web.txt`, dan
-   `start-web.cmd`. File GRIB diperoleh terpisah; letakkan dalam `data` jika ingin.
-3. Buka PowerShell dari folder proyek. **Buat `.venv` hanya jika belum ada**:
-
-```powershell
-if (-not (Test-Path .venv\Scripts\python.exe)) { py -3.11 -m venv .venv }
-```
-
-Pasang paket web (sudah menyertakan paket inti) dan periksa pemasangannya:
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements-web.txt
-.\.venv\Scripts\python.exe -m pip check
-```
-
-4. Klik dua kali `start-web.cmd`, atau jalankan dari PowerShell:
-
-```powershell
-.\start-web.cmd
-```
+   `install.cmd`, dan `start-web.cmd`. File GRIB diperoleh terpisah;
+   letakkan dalam `data` jika ingin.
+3. Klik dua kali **`install.cmd`**. Tunggu pemasangan paket selesai dan pesan
+   **Instalasi selesai**. Installer membuat `.venv` sekali, memakai kembali
+   environment proyek yang valid, memeriksa dependensi dan library ecCodes.
+   Jendela tetap terbuka agar pesan dapat dibaca. Jika Python belum ditemukan,
+   ikuti tautan installer resminya, lalu jalankan `install.cmd` lagi.
+4. Klik dua kali **`start-web.cmd`**. PowerShell dan aktivasi environment tidak
+   diperlukan untuk jalur browser ini.
 
 5. Buka **http://127.0.0.1:8501** jika browser belum terbuka. Biarkan terminal
    tetap terbuka. Pilih berkas/folder → **Periksa kelompok GRIB** (default semua)
    → **Lihat cuplikan** → **Proses berkas terpilih**
    → unduh **CSV/Excel/ZIP**. Simpan unduhan sebelum menutup sesi; tekan Ctrl+C
    di terminal untuk menghentikan aplikasi.
+
+Jika pemasangan gagal, periksa pesan pada jendela installer. Setelah penyebabnya
+diperbaiki, jalankan kembali `install.cmd`. Environment yang parsial, memakai
+Python lain, atau bukan virtualenv proyek akan dihentikan dan tetap dipertahankan;
+minta pendamping memeriksanya. Installer tidak memasang Python global atau
+meminta hak administrator. Catatan tahap minimal ada di
+`data/install-logs/install.log` bila folder dapat ditulis; rincian error hanya
+ditampilkan pada jendela, bukan disalin ke log. Launcher tidak menginstal ulang
+paket setiap kali membuka aplikasi.
 
 Opsional, konversi satu file lewat CLI:
 
@@ -78,9 +77,11 @@ Verifikasi antarmuka dan backend:
 .\.venv\Scripts\python.exe tests\test_grib_groups.py --sample "data\PM 10 DAN PM 2,5 MENTAH.grib"
 ```
 
-## Persiapan di Windows (PowerShell)
+## Persiapan alternatif di Windows (PowerShell, opsional)
 
-Gunakan Python 3.11. Jalankan dari folder proyek:
+Untuk jalur utama, gunakan `install.cmd` di atas. Jika memilih pemasangan manual,
+gunakan Python 3.11 64-bit dari folder proyek. Buat environment **hanya jika
+`.venv` belum ada**; jangan mengganti environment yang belum valid:
 
 ```powershell
 py -3.11 -m venv .venv
@@ -98,6 +99,19 @@ Tidak perlu mengaktifkan virtual environment. Semua perintah berikut langsung
 memakai Python di `.venv`. Dependensi utama dikunci pada versi yang telah diuji;
 wheel `eccodes` yang diuji di Windows sudah menyediakan library GRIB sehingga
 perintah Linux `apt-get` dari notebook tidak diperlukan.
+
+Pengujian installer Windows menjalankan CMD sungguhan, termasuk path dengan
+spasi, `&`, `(`, `)`, dan `!`. Untuk memverifikasi instalasi baru secara offline,
+sediakan wheelhouse lokal berisi dependensi lengkap:
+
+```powershell
+.\.venv\Scripts\python.exe tests\test_windows_installer.py --wheelhouse "data\install-tests\wheelhouse" -v
+```
+
+Tanpa `--wheelhouse`, kasus instalasi baru dilewati. Kasus versi/environment
+memakai Python sungguhan; kegagalan pip/import memakai executable simulasi dan
+diberi label terpisah dalam tests. Pengujian simulasi memerlukan compiler C#
+.NET Framework Windows; konversi sehari-hari tidak memerlukannya.
 
 ## Menjalankan konversi
 
