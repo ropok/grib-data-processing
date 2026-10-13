@@ -5,6 +5,10 @@ Windows nonprogrammer, mulai dari unduhan Python/proyek hingga CLI, Ruang GRIB
 di browser lokal, dan bantuan AI. Sumber mandirinya adalah `panduan-pengguna.tex`; seluruh diagram
 dibuat dengan TeX/TikZ, tanpa file gambar tambahan.
 
+Jalur pemula menggunakan klik dua kali `install.cmd` lalu `start-web.cmd`;
+PowerShell/CLI adalah pilihan tambahan. Python 3.11 64-bit dipasang manual
+melalui installer resmi. PDF tetap 16 halaman dan diperbarui pada file yang sama.
+
 Pengguna converter cukup membaca PDF. LaTeX hanya diperlukan oleh pengelola
 yang ingin membangun ulang atau mengubah panduan.
 

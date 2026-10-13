@@ -10,21 +10,24 @@ memilih sumber, melihat cuplikan, serta mengunduh dan membaca grafik.
 
 ## Persiapan dan mulai
 
-Gunakan Python 3.11. Dari folder proyek, siapkan environment jika belum ada,
-lalu pasang dependensi web:
+Pasang Python 3.11 64-bit dari
+[installer resmi](https://www.python.org/downloads/release/python-3119/), lalu
+ekstrak ZIP development. Klik dua kali **`install.cmd`** di folder proyek.
+Installer membuat `.venv` sekali atau memakai kembali virtualenv proyek yang
+valid, memasang `requirements-web.txt` (termasuk paket inti), menjalankan
+`pip check`, dan memeriksa library ecCodes. Tunggu pesan **Instalasi selesai**.
+PowerShell dan aktivasi environment tidak diperlukan untuk langkah ini.
 
-```powershell
-py -3.11 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-web.txt
-.\.venv\Scripts\python.exe -m pip check
-```
-
-Jika `.venv` sudah ada, gunakan kembali; tidak perlu membuat atau mengaktifkannya
-ulang. Dependensi inti tetap berasal dari `requirements.txt` yang dikunci.
+Jika Python belum ditemukan, jendela memberi tautan dan petunjuk pemasangan
+manual. Jika `.venv` parsial, tidak sesuai versi/64-bit, atau bukan virtualenv
+proyek, installer berhenti tanpa menghapusnya. Jika paket gagal diunduh,
+perbaiki penyebab sesuai error dan jalankan installer lagi. Catatan tahap
+minimal berada di `data/install-logs/install.log` bila dapat ditulis; output
+pip/error asli hanya pada jendela. Dependensi inti tetap dikunci.
 
 Klik dua kali `start-web.cmd`. Launcher masuk ke foldernya sendiri, memeriksa
 environment/dependensi, lalu membuka antarmuka. Jika belum lengkap, jendela
-menampilkan perintah pemasangan; tidak memasang paket diam-diam setiap kali.
+meminta Anda menjalankan `install.cmd`; tidak memasang paket setiap kali.
 
 Alamat bawaan: **http://127.0.0.1:8501**. Biarkan jendela terminal terbuka selama
 memakai aplikasi; tekan **Ctrl+C** untuk menghentikannya. Jika port 8501 sudah

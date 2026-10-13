@@ -56,7 +56,9 @@ Windows 64-bit \textbullet\ Python 3.11 \textbullet\ Pilihan bantuan AI\par
 \item Excel atau aplikasi pembaca spreadsheet jika ingin membuka hasil Excel.
 \end{itemize}
 \end{panel}
-\textbf{Anda tidak perlu menulis program.} Ikuti perintah yang tersedia atau minta
+\textbf{Anda tidak perlu menulis program atau membuka PowerShell.} Pasang Python,
+ekstrak ZIP, klik dua kali \code{install.cmd}, lalu \code{start-web.cmd}.
+Langkah PowerShell/CLI bersifat opsional. Ikuti panduan atau minta
 AI mendampingi Anda. Konversi memakai Python di komputer sendiri; API key OpenAI
 tidak diperlukan untuk menjalankan script. Codex dan akun AI bersifat opsional;
 jalur manual cukup memakai Python, ZIP proyek, dan file GRIB.
@@ -65,7 +67,7 @@ jalur manual cukup memakai Python, ZIP proyek, dan file GRIB.
 \begin{tabular}{@{}p{76mm}p{76mm}@{}}
 \pageref{pg:python}\quad Pasang Python & \pageref{pg:semantics}\quad Pahami titik dan waktu\\[4pt]
 \pageref{pg:download}\quad Unduh proyek & \pageref{pg:web-start}--\pageref{pg:web-results}\quad Gunakan Ruang GRIB\\[4pt]
-\pageref{pg:powershell}--\pageref{pg:packages}\quad Siapkan terminal dan paket & \pageref{pg:codex}--\pageref{pg:ai-browser}\quad Bantuan AI\\[4pt]
+\pageref{pg:packages}\quad Klik installer proyek & \pageref{pg:codex}--\pageref{pg:ai-browser}\quad Bantuan AI\\[4pt]
 \pageref{pg:convert}--\pageref{pg:output}\quad Konversi lewat CLI & \pageref{pg:troubleshooting}--\pageref{pg:references}\quad Masalah dan verifikasi
 \end{tabular}\par
 \vfill
@@ -99,8 +101,9 @@ dipilih, lalu klik \textbf{Install Now} untuk pemasangan pengguna saat ini.
 \node[text=teal,font=\small,align=center] at (12.1,0.55) {Klik setelah\\kotak dicentang};
 \end{tikzpicture}\par
 \step{3}{Selesaikan pemasangan}
-Tunggu pesan sukses, klik \textbf{Close}, lalu tutup dan buka kembali terminal
-yang sudah terbuka. Cara membuka PowerShell ada di halaman \pageref{pg:powershell}.
+Tunggu pesan sukses, klik \textbf{Close}, lalu lanjutkan unduhan proyek pada
+halaman \pageref{pg:download}. Jika ada terminal lama yang terbuka, tutup dahulu
+agar pemasangan Python terbaca saat membuka jendela baru.
 \begin{panel}{Mengapa versi ini?}
 Panduan memakai jalur Python 3.11 yang diuji pada proyek. Rilis 3.11.9 dipilih
 karena menyediakan installer Windows biasa. Ini \textbf{bukan klaim versi Python
@@ -134,12 +137,17 @@ masukkan lokasi berikut lalu tekan Enter:
 Pindahkan folder proyek ke sana, lalu ubah namanya menjadi
 \code{grib-data-processing}. Jangan hanya membuka isi ZIP.
 Jika Documents Anda dialihkan ke OneDrive, gunakan lokasi Documents yang
-sebenarnya di Explorer. Salin alamat folder proyek itu untuk perintah
-\code{cd "alamat folder proyek"} di halaman \pageref{pg:powershell}.
+sebenarnya di Explorer. Installer berjalan dari foldernya sendiri, sehingga
+Anda cukup membuka folder itu. Untuk CLI opsional, salin alamatnya dan gunakan
+\code{cd "alamat folder proyek"} pada halaman \pageref{pg:powershell}.
 \step{3}{Periksa isi folder proyek}
 \begin{terminal}
 Documents\grib-data-processing\
+  install.cmd
+  start-web.cmd
+  app.py
   grib_to_csv.py
+  requirements-web.txt
   requirements.txt
   README.md
   AGENTS.md
@@ -147,13 +155,13 @@ Documents\grib-data-processing\
   tests\
 \end{terminal}
 \begin{panel}{Pastikan Anda berada pada folder yang tepat}
-File \code{grib_to_csv.py} dan \code{requirements.txt} harus terlihat langsung
+File \code{install.cmd} dan \code{start-web.cmd} harus terlihat langsung
 di folder proyek. Jika masih ada folder proyek di dalam folder proyek, buka
 folder yang benar-benar berisi kedua file tersebut. GRIB diperoleh terpisah.
 \end{panel}
 \source{3, 4}
 
-\pagetitle{3}{Buka PowerShell}{PowerShell adalah jendela untuk memberi perintah. Anda cukup menyalin baris yang disediakan.}
+\pagetitle{3 (opsional)}{Buka PowerShell untuk CLI}{Untuk jalur browser, lewati halaman ini: klik installer pada halaman \pageref{pg:packages}, lalu mulai Ruang GRIB pada halaman \pageref{pg:web-start}. PowerShell hanya diperlukan bila memilih perintah manual/CLI.}
 \label{pg:powershell}
 \step{1}{Buka terminal biasa}
 Klik Start, ketik \textbf{PowerShell}, lalu buka \textbf{Windows PowerShell}.
@@ -188,45 +196,46 @@ Baris \code{PS ... >} adalah \textbf{prompt terminal}; jangan ikut menyalinnya.
 Ketik hanya perintah. Tunggu sampai prompt muncul kembali sebelum menjalankan
 perintah berikutnya. Teks lokasi hasil bisa berbeda menurut nama pengguna Anda.
 
-\pagetitle{4}{Siapkan paket proyek}{Environment \code{.venv} menyimpan alat khusus untuk proyek ini. Buat sekali; setelah itu gunakan kembali.}
+\pagetitle{4}{Klik installer proyek}{Environment \code{.venv} menyimpan alat khusus proyek. Installer membuatnya sekali; setelah itu memakai kembali environment yang valid.}
 \label{pg:packages}
-\step{1}{Buat environment}
-Pastikan masih berada di folder proyek, lalu jalankan:
-\begin{terminal}
-py -3.11 -m venv .venv
-\end{terminal}
-Saat berhasil, biasanya tidak ada pesan khusus. Folder \code{.venv} akan dibuat.
-\step{2}{Pasang dependensi}
-\begin{terminal}
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-\end{terminal}
-Tunggu proses unduhan dan pemasangan selesai. Langkah ini membutuhkan internet.
-Daftar paket dikunci dalam \code{requirements.txt} agar versi utama alat yang
-dipakai sesuai dengan pengujian proyek. cfgrib/ecCodes membaca GRIB;
-numpy/pandas/xarray mengolah data; openpyxl menulis Excel.
-\step{3}{Periksa pemasangan}
-\begin{terminal}
-.\.venv\Scripts\python.exe -m pip check
-\end{terminal}
-Pesan yang diharapkan:
-\begin{terminal}
-No broken requirements found.
-\end{terminal}
-\begin{panel}{Tidak perlu aktivasi}
-Perintah panduan langsung memakai Python di \code{.venv}. Anda tidak perlu
-menjalankan \code{Activate.ps1}, mengubah execution policy, atau memasang paket
-ke Python global.
-\end{panel}
+\step{1}{Buka folder hasil ekstraksi}
+Di File Explorer, buka folder yang langsung berisi \code{install.cmd} dan
+\code{start-web.cmd}. Python 3.11 64-bit harus sudah dipasang
+(halaman \pageref{pg:python}). Jangan menjalankan dari dalam ZIP.
+\step{2}{Klik dua kali install.cmd}
+Jendela installer terbuka. Tunggu unduhan dan pemasangan paket selesai;
+langkah pertama ini memerlukan internet. Installer memeriksa Python yang
+sesuai, menyiapkan \code{.venv}, lalu memasang \code{requirements-web.txt}
+yang sudah mencakup converter dan browser.
 \par\noindent\begin{tikzpicture}[node distance=7mm,>=Latex]
-\node[draw=blue,fill=pale,rounded corners,text width=62mm,align=center,minimum height=19mm] (a) {\textbf{Python 3.11}\\Membuat environment};
-\node[draw=teal,fill=pale,rounded corners,text width=62mm,align=center,minimum height=19mm,right=of a] (b) {\textbf{.venv}\\Menyimpan paket converter};
+\node[draw=blue,fill=pale,rounded corners,text width=62mm,align=center,minimum height=22mm] (a) {\textbf{Klik install.cmd}\\Python 3.11 64-bit diperiksa};
+\node[draw=teal,fill=pale,rounded corners,text width=62mm,align=center,minimum height=22mm,right=of a] (b) {\textbf{.venv proyek}\\Paket + ecCodes diperiksa};
 \draw[->,thick,teal] (a)--(b);
 \end{tikzpicture}\par
-\vfill
-Jika ada tulisan \code{ERROR}, simpan seluruh pesan, termasuk perintah yang
-Anda jalankan. Panduan masalah umum ada di halaman \pageref{pg:troubleshooting}.
+\step{3}{Tunggu pesan selesai}
+Installer menjalankan pemeriksaan dependensi dan library ecCodes. Hasil yang
+diinginkan mencakup pesan berikut:
+\begin{terminal}
+No broken requirements found.
+ecCodes native: ...
+Instalasi selesai. Klik dua kali start-web.cmd ...
+\end{terminal}
+Jendela tetap terbuka agar Anda sempat membaca pesan. Tekan tombol apa saja
+untuk menutupnya. Lanjutkan ke halaman \pageref{pg:web-start} untuk browser;
+halaman \pageref{pg:convert} untuk CLI opsional.
+\begin{panel}{Jika installer berhenti}
+Ikuti pesan pada jendela. Jika Python belum ditemukan, pasang melalui tautan
+resmi yang ditampilkan. Jika paket gagal diunduh, perbaiki koneksi/penyebabnya
+lalu jalankan installer lagi. \code{.venv} yang parsial atau tidak valid
+\textbf{tetap dipertahankan}; minta pendamping memeriksanya, jangan langsung hapus.
+\end{panel}
+Tidak perlu aktivasi, PowerShell, atau hak administrator. cfgrib/ecCodes membaca
+GRIB; numpy/pandas/xarray mengolah data; openpyxl menulis Excel. Catatan tahap
+minimal ada di \code{data/install-logs/install.log} bila dapat ditulis;
+rincian error hanya terlihat pada jendela. Panduan masalah ada di halaman
+\pageref{pg:troubleshooting}.
 
-\pagetitle{5}{Masukkan data dan konversi}{Contoh berikut menggunakan nama sampel. Sesuaikan jika nama file Anda berbeda.}
+\pagetitle{5 (opsional)}{Masukkan data dan konversi CLI}{Halaman ini untuk jalur PowerShell. Untuk tombol browser, lanjutkan ke halaman \pageref{pg:web-start}. Contoh memakai nama sampel; sesuaikan dengan file Anda.}
 \label{pg:convert}
 \step{1}{Buat folder data}
 Di File Explorer, buka folder proyek. Buat folder baru bernama \code{data}, lalu
@@ -367,24 +376,18 @@ buatan ecCodes; ini bukan tambahan sampel observasi nyata.
 
 \pagetitle{8}{Mulai Ruang GRIB}{Ruang GRIB adalah antarmuka browser lokal proyek ini. Anda memilih data melalui tombol; tidak perlu mengetik perintah konversi untuk setiap file.}
 \label{pg:web-start}
-\step{1}{Pasang paket web sekali}
-Buka PowerShell pada folder proyek (halaman \pageref{pg:powershell}). Gunakan
-\code{.venv} yang sudah dibuat; jika belum ada, buat sesuai halaman
-\pageref{pg:packages}. Jalankan satu perintah setiap kali:
-\begin{terminal}
-.\.venv\Scripts\python.exe -m pip install -r requirements-web.txt
-.\.venv\Scripts\python.exe -m pip check
-\end{terminal}
-\code{requirements-web.txt} sudah menyertakan paket inti converter; Anda tidak
-perlu memasangnya dua kali. Pesan pemeriksaan yang diharapkan:
-\code{No broken requirements found.}
+\step{1}{Pastikan installer sudah selesai}
+Ikuti halaman \pageref{pg:packages}: klik dua kali \code{install.cmd} dan tunggu
+\textbf{Instalasi selesai}. Paket browser dan converter sudah dipasang bersama;
+tidak perlu memasang paket lagi sebelum setiap penggunaan.
 \step{2}{Jalankan launcher}
 Klik dua kali \code{start-web.cmd} di Explorer, atau jalankan dari PowerShell:
 \begin{terminal}
 .\start-web.cmd
 \end{terminal}
-Launcher memeriksa environment dan paket. Jika belum lengkap, ia menunjukkan
-perintah persiapan, bukan memasang paket diam-diam setiap peluncuran.
+Jalur utama cukup klik dua kali; perintah di atas hanya alternatif opsional.
+Launcher memeriksa environment dan paket. Jika belum lengkap, ia meminta
+Anda menjalankan \code{install.cmd}; paket tidak dipasang ulang tiap peluncuran.
 \step{3}{Buka alamat lokal}
 Jika browser belum terbuka otomatis, buka
 \href{http://127.0.0.1:8501}{http://127.0.0.1:8501}. Bila port bawaan sedang
@@ -537,7 +540,7 @@ yang dipilih berisi script, \code{README.md}, dan \code{AGENTS.md}.
 \begin{panel}{Prompt siap pakai}
 Saya bukan programmer. Baca AGENTS.md dan README.md di proyek ini. Tolong
 jalankan Ruang GRIB di browser lokal. Gunakan Python 3.11 dan .venv yang ada;
-pasang requirements-web.txt jika perlu, lalu jalankan start-web.cmd.
+jalankan install.cmd jika perlu, lalu jalankan start-web.cmd.
 Saya ingin memilih folder data, memeriksa seluruh kelompok GRIB,
 melihat cuplikan per filter, mengunduh CSV/Excel,
 dan melihat grafik satu variabel. Jelaskan lokasi hasil dan makna waktunya.
@@ -564,17 +567,18 @@ Script converter sendiri tidak membutuhkan login OpenAI atau API key.
 Buka \href{https://chatgpt.com}{chatgpt.com} di browser, masuk, lalu buat chat.
 Sertakan README atau AGENTS yang Anda salin/unggah agar konteks proyek jelas.
 \step{2}{Minta panduan menjalankan di komputer Anda}
-\begin{panel}{Prompt pendamping PowerShell}
+\begin{panel}{Prompt pendamping instalasi dan browser}
 Saya pengguna Windows nonprogrammer. Proyek saya ada di
 Documents/grib-data-processing dan file input bernama
-"data/PM 10 DAN PM 2,5 MENTAH.grib". Bantu saya menjalankan converter lokal
-dengan Python 3.11 dan .venv berdasarkan README yang saya berikan.
+"data/PM 10 DAN PM 2,5 MENTAH.grib". Bantu saya memasang Python 3.11 64-bit,
+menjalankan install.cmd, lalu start-web.cmd berdasarkan README yang saya berikan.
 Beri satu langkah setiap kali, jelaskan hasil yang seharusnya tampil,
 dan tunggu laporan saya sebelum langkah berikutnya. Jangan menganggap
 Anda dapat membaca file lokal saya dari nama path saja.
 \end{panel}
 Jika terjadi error, kirim perintah yang dijalankan dan teks error lengkap.
-Anda tetap menjalankan perintah pada PowerShell sendiri.
+Anda tetap melakukan klik atau perintah di komputer sendiri. PowerShell
+hanya diperlukan jika memilih jalur CLI/manual.
 \step{3}{Unggah hasil untuk dibantu membacanya}
 Gunakan tombol lampiran untuk mengunggah CSV atau XLSX jika fitur tersedia,
 lalu kirim prompt berikut:
@@ -599,27 +603,24 @@ Anda. Jika tidak didukung, jalankan script secara lokal dan unggah hasilnya.
 \toprule
 \textbf{Pesan / keadaan}&\textbf{Yang dilakukan}\\
 \midrule
-\code{py} tidak dikenali&Periksa Python 3.11 sudah terpasang; buka terminal baru. Jika launcher tidak tersedia, gunakan path Python pada kotak di bawah.\\[6pt]
-Script atau requirements tidak ditemukan&Ulangi \code{cd} pada halaman \pageref{pg:powershell}; jalankan \code{dir}. Pastikan file ada langsung dalam folder proyek, bukan dalam ZIP.\\[6pt]
+Python belum ditemukan&Pasang Python 3.11 64-bit resmi (halaman \pageref{pg:python}), dengan PATH dan launcher; jalankan \code{install.cmd} lagi.\\[6pt]
+Proyek / .venv belum valid&Ekstrak ZIP lengkap. Jika \code{.venv} parsial atau bukan environment proyek yang sesuai, installer mempertahankannya; minta pendamping memeriksa, jangan langsung hapus.\\[6pt]
 Input file does not exist&Jalankan \code{dir data\*.grib}. Cocokkan nama, akhiran, spasi, dan path dalam tanda kutip.\\[6pt]
-\code{pip} gagal mengunduh&Periksa internet dan pesan proxy/firewall. Kirim error lengkap kepada AI/pendamping. Setelah penyebab diperbaiki, ulangi instalasi requirements.\\[6pt]
+\code{pip} gagal mengunduh&Periksa internet dan pesan proxy/firewall. Kirim error pada jendela kepada pendamping. Setelah penyebab diperbaiki, jalankan \code{install.cmd} lagi.\\[6pt]
 Permission denied pada XLSX&Tutup file hasil di Excel. Jika folder tidak dapat ditulis, gunakan \code{--output-dir "data\hasil"}.\\[6pt]
 GRIB memerlukan filter / unsupported dimensions&Kirim pesan lengkap ke AI. Minta pemeriksaan kunci GRIB dan dimensi; jangan menebak filter atau mengubah data.\\[6pt]
-Launcher / browser belum siap&Ikuti petunjuk paket pada launcher. Biarkan terminal terbuka; gunakan alamat aktual jika port 8501 dipakai. Langkah mulai ada pada halaman \pageref{pg:web-start}.\\
+Launcher / browser belum siap&Jalankan \code{install.cmd} jika paket belum lengkap. Biarkan terminal terbuka; gunakan alamat aktual jika port 8501 dipakai. Lihat halaman \pageref{pg:web-start}.\\
 \bottomrule
 \end{tabular}\par
 \vspace{3mm}
-\textbf{Alternatif membuat environment jika launcher tidak tersedia}\par
-Untuk pemasangan per pengguna pada lokasi bawaan Python 3.11, jalankan:
-\begin{terminal}
-$python = "$env:LOCALAPPDATA\Programs\Python\Python311\python.exe"
-& $python -m venv .venv
-\end{terminal}
-Jika file ini juga tidak ditemukan, periksa lokasi Python yang sebenarnya;
-path tersebut hanya berlaku untuk lokasi pemasangan bawaan.
+\textbf{Catatan tahap installer}\par
+\code{data/install-logs/install.log} mencatat waktu, tahap, status dan exit code
+secara minimal. Rincian error asli tidak disalin ke log. Jika log tidak dapat
+ditulis, installer tetap lanjut dan memberi pesan. Kirim teks/screenshot
+jendela error kepada pendamping; jangan mengirim token atau kata sandi.
 \begin{panel}{Prompt diagnosis yang membantu}
-Saya menjalankan perintah berikut: [tempel perintah]. Pesannya: [tempel
-error lengkap]. Lokasi proyek: [hasil pwd]. Isi folder: [hasil dir].
+Saya menjalankan install.cmd / start-web.cmd / perintah berikut: [sebutkan].
+Pesannya: [tempel error]. Lokasi folder proyek: [alamat dari Explorer].
 Tolong jelaskan penyebab yang dapat diperiksa dan beri satu langkah perbaikan
 pada satu waktu. Pertahankan data asli; jangan menebak filter GRIB.
 \end{panel}

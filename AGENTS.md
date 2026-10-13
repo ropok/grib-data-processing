@@ -40,8 +40,10 @@ dengan bahasa sederhana. Panduan perintah lengkap ada di `README.md`.
    menjalankan rencana. Sampaikan model/effort yang dipakai dan keterbatasan jika
    konfigurasi itu tidak tersedia. Jangan menganggap tulisan ini otomatis
    mengganti model.
-3. Gunakan Python 3.11 dan environment `.venv` dalam proyek. Jika belum ada,
-   buat environment dan pasang `requirements.txt`. Jalankan perintah memakai
+3. Gunakan Python 3.11 64-bit dan environment `.venv` dalam proyek. Untuk
+   penyiapan Windows lengkap, gunakan `install.cmd`; paket web sudah mencakup
+   paket inti. Jangan mengganti `.venv` yang tidak valid tanpa keputusan pengguna.
+   Untuk jalur CLI manual, `requirements.txt` tetap tersedia. Jalankan perintah memakai
    `.venv/Scripts/python.exe`; pengguna tidak perlu mengaktifkan environment
    atau menyalin perintah satu per satu.
 
@@ -93,7 +95,12 @@ dengan bahasa sederhana. Panduan perintah lengkap ada di `README.md`.
 ### Saat menggunakan antarmuka browser lokal
 
 - Gunakan `requirements-web.txt` dalam `.venv` yang sama; jangan mengganti versi
-  inti converter. Jalankan `start-web.cmd` atau Streamlit pada `127.0.0.1`.
+  inti converter. Untuk pengguna nonteknis, arahkan memasang Python 3.11 64-bit
+  dari installer resmi lalu klik dua kali `install.cmd`. Installer menyiapkan
+  `.venv`, paket web/inti, pip check dan ecCodes native; Python global tidak
+  dipasang otomatis. Environment lama yang tidak valid tidak boleh dihapus
+  atau diganti tanpa keputusan pengguna. Jalankan `start-web.cmd` atau
+  Streamlit pada `127.0.0.1` setelah installer selesai.
   Panduan antarmuka ada di `docs/browser-interface.md`; tidak perlu deployment
   web atau API key untuk memakai aplikasi ini.
 - Arahkan pengguna memilih Unggah berkas, Unggah folder, atau Folder lokal.
@@ -123,6 +130,14 @@ dengan bahasa sederhana. Panduan perintah lengkap ada di `README.md`.
 - Jalankan juga `tests/test_grib_groups.py` untuk perubahan discovery. Monthly
   diverifikasi lewat fixture GRIB ecCodes dan dataset sintetis; jangan menyebut
   fixture sebagai observasi pengguna tambahan. PDF memakai sumber yang sama.
+- Untuk perubahan installer/launcher, verifikasi outcome CMD nyata, path dengan
+  spasi, &, tanda kurung dan !, penggunaan ulang serta instalasi `.venv` baru,
+  versi/bitness/prefix proyek dan kegagalan tiap tahap. `--no-pause` hanya untuk
+  QA; jalur klik dua kali harus mempertahankan jendela agar pesan terbaca.
+  Log `data/install-logs/install.log` hanya berisi timestamp, tahap tetap,
+  status dan exit code; jangan mencatat output pip, path, URL/token atau env.
+  Logging yang gagal tidak boleh menggagalkan instalasi. Bedakan simulasi
+  failure dari pemeriksaan interpreter, pemasangan dan ecCodes sungguhan.
 
 ### Contoh prompt yang bisa langsung dipakai
 
@@ -145,5 +160,6 @@ dengan bahasa sederhana. Panduan perintah lengkap ada di `README.md`.
 
 > Tolong jalankan antarmuka Ruang GRIB di browser lokal. Saya ingin memilih
 > folder data, melihat cuplikan tabel, mengunduh CSV/Excel, dan menampilkan grafik
-> satu variabel. Gunakan .venv dan requirements-web.txt, pertahankan sumber,
+> satu variabel. Periksa Python 3.11 64-bit; jalankan install.cmd bila perlu,
+> gunakan .venv proyek, pertahankan sumber,
 > ikuti aturan model di atas, dan tunjukkan alamat aplikasi serta hasil verifikasi.
