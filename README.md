@@ -4,6 +4,11 @@ Konversi satu file GRIB menjadi CSV dan Excel dengan `grib_to_csv.py`. Script
 mempertahankan hasil pengolahan satu file pada `GribToCsv.ipynb`; notebook asli
 tetap tersedia sebagai referensi.
 
+Untuk panduan visual dari nol, baca [panduan pengguna PDF](docs/panduan-pengguna.pdf).
+Panduan mencakup instalasi Windows, unduhan proyek, menjalankan konversi, membaca
+hasil, dan contoh prompt Codex/AI browser. [Sumber LaTeX dan petunjuk rebuild](docs/README.md)
+tersedia untuk pengelola dokumentasi.
+
 ## Persiapan di Windows (PowerShell)
 
 Gunakan Python 3.11. Jalankan dari folder proyek:
